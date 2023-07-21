@@ -1,0 +1,1112 @@
+***MODULE VI – DBS ASSIGNMENT***
+Manufacturing Unit Monitoring System: (MUMS)
+
+Team Members:
+1)	Akshay Anil Jagtap (14)
+2)	Aniket Avinash Pattiwar (21)
+3)	Devi Dinesh (36)
+
+
+
+================================================================= DEPT TABLE =========================================================================================
+CREATE TABLE DEPT
+(
+	DEPTNO CHAR(1) PRIMARY KEY,
+	DNAME VARCHAR(25) NOT NULL,
+	MANAGER CHAR(4),
+	EX1 FLOAT,
+	EX2 VARCHAR(25)   
+);
+
+
+======================================================= INSERT STATEMENTS FOR DEPT TABLE ==============================================================================
+INSERT INTO DEPT (DEPTNO, DNAME, MANAGER)VALUES
+('F','FINANCE','F001'),
+('R','R & D','R001'),
+('P','PRODUCTION','P001'),
+('S','SALES','S001');
+
+SELECT * FROM DEPT;
+			+--------+------------+---------+------+------+
+			| DEPTNO | DNAME      | MANAGER | EX1  | EX2  |
+			+--------+------------+---------+------+------+
+			| F      | FINANCE    | F001    | NULL | NULL |
+			| P      | PRODUCTION | P001    | NULL | NULL |
+			| R      | R & D      | R001    | NULL | NULL |
+			| S      | SALES      | S001    | NULL | NULL |
+			+--------+------------+---------+------+------+
+
+================================================================= EMP TABLE ===========================================================================================
+CREATE TABLE EMP
+(
+	ENUM CHAR(4) PRIMARY KEY,
+    BASIC_SAL FLOAT NOT NULL,
+    DEPTNO CHAR(1) NOT NULL,
+    JOB CHAR(1) DEFAULT 'W' NOT NULL
+    CONSTRAINT CH_EMP_JOB CHECK (JOB IN ('M', 'S', 'W')),
+    HOLIDAYS TINYINT DEFAULT 0,
+    CITY VARCHAR(4),
+    HRA FLOAT,
+    TOTSAL FLOAT,
+    HIREDATE DATE NOT NULL,
+    EX1 FLOAT,
+    EX2 INT,
+    EX3 VARCHAR(25),
+    CONSTRAINT FK_DEPT_EMP FOREIGN KEY (DEPTNO)
+    REFERENCES DEPT (DEPTNO)
+);
+SELECT * FROM EMP ORDER BY ENUM;
+
+
+========================================================== AFTER INSERT TRIGGER ON EMP TABLE ==================================================================================
+DELIMITER //
+CREATE TRIGGER AI_EMP
+AFTER INSERT
+ON EMP FOR EACH ROW
+BEGIN
+	DECLARE COMM FLOAT;
+    DECLARE EXP INT;
+    DECLARE HRA FLOAT;
+	IF (POSITION('S' IN NEW.ENUM)=1) AND NEW.JOB='W' THEN
+		SET EXP=DATEDIFF(SYSDATE(), NEW.HIREDATE);
+		IF (EXP>10*365) THEN
+			SET COMM = 0.05;
+		ELSEIF (EXP>5*365) THEN
+			SET COMM=0.04;
+		ELSE
+			SET COMM=0.03;
+        END IF;
+        INSERT INTO SALESMAN VALUES (NEW.ENUM, COMM, NEW.CITY);
+    END IF;
+    INSERT INTO EMP_AUDIT VALUES (NEW.ENUM, USER(), SYSDATE(), CONCAT(ENUM, ' EMPLOYEE ADDED SUCESSFULLY'));
+END; //
+DELIMITER ;
+
+
+============================================================== EMP_DETAILS TABLE =========================================================================================
+CREATE TABLE EMP_DETAILS
+(
+	ENUM CHAR(4) PRIMARY KEY,
+    ENAME VARCHAR(25) NOT NULL,
+    MOB BIGINT NOT NULL
+    CONSTRAINT CH_EMP_MOB CHECK (LENGTH(MOB)=10),
+    GEN CHAR(1) NOT NULL
+    CONSTRAINT CH_EMP_GEN CHECK (GEN IN('M', 'F', 'T')),
+    AADHAR BIGINT NOT NULL
+    CONSTRAINT CH_EMP_AADHAR CHECK (LENGTH(AADHAR)=12),
+    DOB DATE NOT NULL,
+    CITY VARCHAR(4) NOT NULL,
+    PINCODE INT NOT NULL
+    CONSTRAINT CH_EMP_PINCODE CHECK (LENGTH(PINCODE)=6),
+    ADDRESS TEXT,
+    EX1 FLOAT,
+    EX2 INT,
+    EX3 VARCHAR(25),
+    UNIQUE (AADHAR),
+    UNIQUE (MOB),
+    CONSTRAINT FK_EMP_EMP_DETAILS FOREIGN KEY(ENUM)
+    REFERENCES EMP (ENUM) ON DELETE CASCADE
+);
+SELECT * FROM EMP_DETAILS ORDER BY ENUM;
+
+
+======================================================== AFTER INSERT TRIGGER ON EMP_DETAILS TABLE ====================================================================
+DELIMITER //
+CREATE TRIGGER AI_EMP_DETAILS
+AFTER INSERT
+ON EMP_DETAILS FOR EACH ROW
+BEGIN
+    DECLARE H FLOAT;
+    DECLARE TOT FLOAT;
+    IF (NEW.CITY IN('BOMB','PUNE', 'DELH', 'CHEN')) THEN 
+		SET H=0.5;
+	ELSE
+		SET H=0.4;
+    END IF;
+    SET TOT= TOTSALCAL(NEW.ENUM, H);
+    UPDATE EMP SET HRA=H, EMP.CITY=NEW.CITY, EMP.TOTSAL=TOT WHERE EMP.ENUM=NEW.ENUM;
+    INSERT INTO EMP_AUDIT VALUES (NEW.ENUM, USER(), SYSDATE(), CONCAT(ENUM,' HRA=',H,' AND DETAILS ADDED SUCESSFULLY'));
+END; //
+DELIMITER ;
+
+
+================================================================ SALESMAN TABLE ===========================================================================================
+CREATE TABLE SALESMAN
+(
+	SNUM CHAR(4) PRIMARY KEY,
+    COMM FLOAT,
+    LOC VARCHAR(4) NOT NULL,
+    CONSTRAINT FK_EMP_SALESMAN FOREIGN KEY (SNUM)
+    REFERENCES EMP (ENUM)
+);
+SELECT * FROM SALESMAN ORDER BY SNUM;
+
+
+================================================================= EMP_AUDIT TABLE ====================================================================================
+CREATE TABLE EMP_AUDIT
+(
+	ENUM CHAR(4),
+    USER VARCHAR(25),
+    TIME_STAMP DATETIME,
+    REMARK VARCHAR(200)
+);
+SELECT * FROM EMP_AUDIT
+ORDER BY TIME_STAMP DESC;
+
+
+======================================================== INSERT STATEMENTS FOR EMP TABLE ==================================================================================
+INSERT INTO EMP (ENUM, BASIC_SAL, DEPTNO, JOB, CITY, HIREDATE) VALUES
+('F001', 34000, 'F', 'M', 'BOMB', '1988-09-21'),
+('F002', 30000, 'F', 'S', 'BOMB', '1991-08-25'),
+('F003', 25000, 'F', 'W', 'BOMB', '1998-09-21'),
+('F004', 22000, 'F', 'W', 'BOMB', '2004-11-1'),
+('R001', 34000, 'R', 'M', 'BOMB', '1999-12-11'),
+('R002', 31000, 'R', 'S', 'BOMB', '2006-7-27'),
+('R003', 25000, 'R', 'W', 'PUNE', '2010-4-1'),
+('R004', 21000, 'R', 'W', 'BOMB', '2015-05-19'),
+('P001', 32000, 'P', 'M', 'BOMB', '1992-05-19'),
+('P002', 23000, 'P', 'S', 'BOMB', '1997-04-18'),
+('P003', 20000, 'P', 'W', 'BOMB', '2004-03-29'),
+('P004', 19000, 'P', 'W', 'BOMB', '2010-09-8'),
+('P005', 18000, 'P', 'W', 'BOMB', '2015-09-21'),
+('S001', 34000, 'S', 'M', 'BOMB', '1990-09-20'),
+('S002', 21000, 'S', 'W', 'BOMB', '2010-08-10'),
+('S003', 20000, 'S', 'W', 'PUNE', '2012-1-11'),
+('S004', 20000, 'S', 'W', 'NAGP', '2016-09-13'),
+('S005', 19000, 'S', 'W', 'DELH', '2017-02-15'),
+('S006', 18500, 'S', 'W', 'CHEN', '2018-7-23'),
+('S007', 17000, 'S', 'W', 'BEED', '2019-5-2');
+
+SELECT * FROM EMP ORDER BY ENUM;
+			+------+-----------+--------+-----+----------+------+------+--------+------------+------+------+------+
+			| ENUM | BASIC_SAL | DEPTNO | JOB | HOLIDAYS | CITY | HRA  | TOTSAL | HIREDATE   | EX1  | EX2  | EX3  |
+			+------+-----------+--------+-----+----------+------+------+--------+------------+------+------+------+
+			| F001 |     34000 | F      | M   |        0 | BOMB | NULL |   NULL | 1988-09-21 | NULL | NULL | NULL |
+			| F002 |     30000 | F      | S   |        0 | BOMB | NULL |   NULL | 1991-08-25 | NULL | NULL | NULL |
+			| F003 |     25000 | F      | W   |        0 | BOMB | NULL |   NULL | 1998-09-21 | NULL | NULL | NULL |
+			| F004 |     22000 | F      | W   |        0 | BOMB | NULL |   NULL | 2004-11-01 | NULL | NULL | NULL |
+			| P001 |     32000 | P      | M   |        0 | BOMB | NULL |   NULL | 1992-05-19 | NULL | NULL | NULL |
+			| P002 |     23000 | P      | S   |        0 | BOMB | NULL |   NULL | 1997-04-18 | NULL | NULL | NULL |
+			| P003 |     20000 | P      | W   |        0 | BOMB | NULL |   NULL | 2004-03-29 | NULL | NULL | NULL |
+			| P004 |     19000 | P      | W   |        0 | BOMB | NULL |   NULL | 2010-09-08 | NULL | NULL | NULL |
+			| P005 |     18000 | P      | W   |        0 | BOMB | NULL |   NULL | 2015-09-21 | NULL | NULL | NULL |
+			| R001 |     34000 | R      | M   |        0 | BOMB | NULL |   NULL | 1999-12-11 | NULL | NULL | NULL |
+			| R002 |     31000 | R      | S   |        0 | BOMB | NULL |   NULL | 2006-07-27 | NULL | NULL | NULL |
+			| R003 |     25000 | R      | W   |        0 | PUNE | NULL |   NULL | 2010-04-01 | NULL | NULL | NULL |
+			| R004 |     21000 | R      | W   |        0 | BOMB | NULL |   NULL | 2015-05-19 | NULL | NULL | NULL |
+			| S001 |     34000 | S      | M   |        0 | BOMB | NULL |   NULL | 1990-09-20 | NULL | NULL | NULL |
+			| S002 |     21000 | S      | W   |        0 | BOMB | NULL |   NULL | 2010-08-10 | NULL | NULL | NULL |
+			| S003 |     20000 | S      | W   |        0 | PUNE | NULL |   NULL | 2012-01-11 | NULL | NULL | NULL |
+			| S004 |     20000 | S      | W   |        0 | NAGP | NULL |   NULL | 2016-09-13 | NULL | NULL | NULL |
+			| S005 |     19000 | S      | W   |        0 | DELH | NULL |   NULL | 2017-02-15 | NULL | NULL | NULL |
+			| S006 |     18500 | S      | W   |        0 | CHEN | NULL |   NULL | 2018-07-23 | NULL | NULL | NULL |
+			| S007 |     17000 | S      | W   |        0 | BEED | NULL |   NULL | 2019-05-02 | NULL | NULL | NULL |
+			+------+-----------+--------+-----+----------+------+------+--------+------------+------+------+------+
+			
+SELECT * FROM EMP_AUDIT ORDER BY SR_NO DESC;
+			+-------+------+-----------------+---------------------+---------------------------------+
+			| SR_NO | ENUM | USER            | TIME_STAMP          | REMARK                          |
+			+-------+------+-----------------+---------------------+---------------------------------+
+			|    20 | S007 | DEVIP@localhost | 2022-05-24 13:00:42 | S007 EMPLOYEE ADDED SUCESSFULLY |
+			|    19 | S006 | DEVIP@localhost | 2022-05-24 13:00:42 | S006 EMPLOYEE ADDED SUCESSFULLY |
+			|    18 | S005 | DEVIP@localhost | 2022-05-24 13:00:42 | S005 EMPLOYEE ADDED SUCESSFULLY |
+			|    17 | S004 | DEVIP@localhost | 2022-05-24 13:00:42 | S004 EMPLOYEE ADDED SUCESSFULLY |
+			|    16 | S003 | DEVIP@localhost | 2022-05-24 13:00:42 | S003 EMPLOYEE ADDED SUCESSFULLY |
+			|    15 | S002 | DEVIP@localhost | 2022-05-24 13:00:42 | S002 EMPLOYEE ADDED SUCESSFULLY |
+			|    14 | S001 | DEVIP@localhost | 2022-05-24 13:00:42 | S001 EMPLOYEE ADDED SUCESSFULLY |
+			|    13 | P005 | DEVIP@localhost | 2022-05-24 13:00:42 | P005 EMPLOYEE ADDED SUCESSFULLY |
+			|    12 | P004 | DEVIP@localhost | 2022-05-24 13:00:42 | P004 EMPLOYEE ADDED SUCESSFULLY |
+			|    11 | P003 | DEVIP@localhost | 2022-05-24 13:00:42 | P003 EMPLOYEE ADDED SUCESSFULLY |
+			|    10 | P002 | DEVIP@localhost | 2022-05-24 13:00:42 | P002 EMPLOYEE ADDED SUCESSFULLY |
+			|     9 | P001 | DEVIP@localhost | 2022-05-24 13:00:42 | P001 EMPLOYEE ADDED SUCESSFULLY |
+			|     8 | R004 | DEVIP@localhost | 2022-05-24 13:00:42 | R004 EMPLOYEE ADDED SUCESSFULLY |
+			|     7 | R003 | DEVIP@localhost | 2022-05-24 13:00:42 | R003 EMPLOYEE ADDED SUCESSFULLY |
+			|     6 | R002 | DEVIP@localhost | 2022-05-24 13:00:42 | R002 EMPLOYEE ADDED SUCESSFULLY |
+			|     5 | R001 | DEVIP@localhost | 2022-05-24 13:00:42 | R001 EMPLOYEE ADDED SUCESSFULLY |
+			|     4 | F004 | DEVIP@localhost | 2022-05-24 13:00:42 | F004 EMPLOYEE ADDED SUCESSFULLY |
+			|     3 | F003 | DEVIP@localhost | 2022-05-24 13:00:42 | F003 EMPLOYEE ADDED SUCESSFULLY |
+			|     2 | F002 | DEVIP@localhost | 2022-05-24 13:00:42 | F002 EMPLOYEE ADDED SUCESSFULLY |
+			|     1 | F001 | DEVIP@localhost | 2022-05-24 13:00:42 | F001 EMPLOYEE ADDED SUCESSFULLY |
+			+-------+------+-----------------+---------------------+---------------------------------+
+
+
+===================================================== INSERT STATEMENTS FOR EMP_DETAILS TABLE =============================================================================
+
+INSERT INTO EMP_DETAILS (ENUM, ENAME, MOB, GEN, AADHAR, DOB, CITY, PINCODE, ADDRESS) VALUES
+('F001', 'ABHISHEK KUMAR BHAGAUS', 9986995765,'M', 123456788765, '1971-07-23', 'BOMB', 400622, '29/SHWETAMBARI APT, BHATWADI, THANE'),
+('F002', 'HRISHIK SUDHIR SHETTY', 9869989658,'M', 113456788765, '1975-01-30', 'BOMB', 400612, '12/SAI SADAN, KISSAN NAGAR, BHATWADI, THANE'),
+('F003', 'MASIRA SHAIKH', 9989995765,'F', 552356788765, '1980-12-3', 'BOMB', 401620, 'B-64/KRANTI TOWERS, NARIMAN POINT, MUMBAI'),
+('F004', 'SANDEEP RAMPRAKASH SAHU', 8069995765,'M', 623456778769, '1984-07-23', 'BOMB', 400611, NULL),
+('R001', 'SHRIRAM RAMADEVI IYER', 8890095765,'M', 671459978769, '1973-08-13', 'BOMB', 400641, 'Ground Floor 56 Nagdevi St Mandvi, Mumbai'),
+('R002', 'VIJAYALAKSHMI IYER', 8891695700,'F', 771454978669, '1981-08-11', 'BOMB', 401641, '234  S.v.road Opp. Railway Station Andheri, Mumbai'),
+('R003', 'PALLAVI BAKALE', 8199987657,'F', 451453478721, '1987-09-2', 'PUNE', 400600, '49  Wafa Chs Laxmibe Cheda Marg Nalasopara, Pune'),
+('R004', 'SAIRAJ VINAYAK HEGISHTE', 9099095765,'M', 311359998759, '1988-01-11', 'BOMB', 400631, 'Mittal Chambers Yogakshema , Mumbai'),
+('P001', 'VASNAT NADAR', 9833095765,'M', 119889998759, '1966-01-17', 'BOMB', 403631, 'D-302 Ttc Indl Area Turbhe Naka Turbhe, Mumbai'),
+('P002', 'NADAR BALAJI SHAKTIVEL', 9837895765,'M', 341259998009, '1975-01-31', 'BOMB', 400630, 'W-258257256 Midc Phase Ii Shivaji Udyog Nagar Dombivli, Mumbai'),
+('P003', 'ROHAN JANARDAN CHAVAN', 8003095700,'M', 711259998899, '1986-09-19', 'BOMB', 400689, 'Jabbar Complex Begumpet, Hyderabad,Mumbai'),
+('P004', 'SINGH ADITYA SUGREEV', 9038995787,'M', 321259998567, '1988-07-1', 'BOMB', 401006, '28  Western Highway Sativali Vasai , Mumbai'),
+('P005', 'SUMEET SURESH PILLAI', 8102395787,'M', 561259788346, '1994-01-12', 'BOMB', 400026, '104  Sarang Street Near Crawford Market Mandvi'),
+('S001', 'SOHAM BALAKRISHNAN K', 8882395788,'M', 781259788721, '1994-01-12', 'BOMB', 402026, '2/3 Shri Gurudutta Krupa Chs R B Mehta Road Patel Chowk Near Rly Station, THANE'),
+('S002', 'SOHAN VISHNU GOWDA', 9702394487,'M', 568759783456, '1994-01-12', 'BOMB', 401121, '424  Plot No  Persipolis Prem Sec  Vashi Navi Mumba'),
+('S003', 'RITESH MAHESH SHIKNE', 7920211781,'M', 432259788711, '1994-01-12', 'PUNE', 401025, '42 -b-c Mahavir Bldg Navneet Showroom Bhandark Matunga,,PUNE'),
+('S004', 'MARTINRAJ JOHNRAJ NADAR', 8202300001,'M', 761259788123, '1994-01-12', 'NAGP', 401111, NULL),
+('S005', 'KALPESH JOTIBA PATIL', 8802225722,'M', 566549788541, '1994-01-12', 'DELH', 401012, '40   Khetwadi Main Road Dr Bhajekar Street Behind Harkisandas Hospital Khetwadi, DELHI'),
+('S006', 'JABIN JAGADEESAN NADAR', 7602393181,'M', 331259788776, '1994-01-12', 'CHEN', 401113, '156  Opp Remson Co Ganesh Nagar Charkop Kandivli, CHENNAI'),
+('S007', 'CHAITANYA ABHAY GHATKAR', 7502395745,'M', 560259788709, '1994-01-12', 'BEED', 401020, NULL);
+
+SELECT * FROM EMP_DETAILS ORDER BY ENUM;
+			+------+-------------------------+------------+-----+--------------+------------+------+---------+----------------------------------------------------------------------------------------+------+------+------+
+			| ENUM | ENAME                   | MOB        | GEN | AADHAR       | DOB        | CITY | PINCODE | ADDRESS                                                                                | EX1  | EX2  | EX3  |
+			+------+-------------------------+------------+-----+--------------+------------+------+---------+----------------------------------------------------------------------------------------+------+------+------+
+			| F001 | ABHISHEK KUMAR BHAGAUS  | 9986995765 | M   | 123456788765 | 1971-07-23 | BOMB |  400622 | 29/SHWETAMBARI APT, BHATWADI, THANE                                                    | NULL | NULL | NULL |
+			| F002 | HRISHIK SUDHIR SHETTY   | 9869989658 | M   | 113456788765 | 1975-01-30 | BOMB |  400612 | 12/SAI SADAN, KISSAN NAGAR, BHATWADI, THANE                                            | NULL | NULL | NULL |
+			| F003 | MASIRA SHAIKH           | 9989995765 | F   | 552356788765 | 1980-12-03 | BOMB |  401620 | B-64/KRANTI TOWERS, NARIMAN POINT, MUMBAI                                              | NULL | NULL | NULL |
+			| F004 | SANDEEP RAMPRAKASH SAHU | 8069995765 | M   | 623456778769 | 1984-07-23 | BOMB |  400611 | NULL                                                                                   | NULL | NULL | NULL |
+			| P001 | VASNAT NADAR            | 9833095765 | M   | 119889998759 | 1966-01-17 | BOMB |  403631 | D-302 Ttc Indl Area Turbhe Naka Turbhe, Mumbai                                         | NULL | NULL | NULL |
+			| P002 | NADAR BALAJI SHAKTIVEL  | 9837895765 | M   | 341259998009 | 1975-01-31 | BOMB |  400630 | W-258257256 Midc Phase Ii Shivaji Udyog Nagar Dombivli, Mumbai                         | NULL | NULL | NULL |
+			| P003 | ROHAN JANARDAN CHAVAN   | 8003095700 | M   | 711259998899 | 1986-09-19 | BOMB |  400689 | Jabbar Complex Begumpet, Hyderabad,Mumbai                                              | NULL | NULL | NULL |
+			| P004 | SINGH ADITYA SUGREEV    | 9038995787 | M   | 321259998567 | 1988-07-01 | BOMB |  401006 | 28  Western Highway Sativali Vasai , Mumbai                                            | NULL | NULL | NULL |
+			| P005 | SUMEET SURESH PILLAI    | 8102395787 | M   | 561259788346 | 1994-01-12 | BOMB |  400026 | 104  Sarang Street Near Crawford Market Mandvi                                         | NULL | NULL | NULL |
+			| R001 | SHRIRAM RAMADEVI IYER   | 8890095765 | M   | 671459978769 | 1973-08-13 | BOMB |  400641 | Ground Floor 56 Nagdevi St Mandvi, Mumbai                                              | NULL | NULL | NULL |
+			| R002 | VIJAYALAKSHMI IYER      | 8891695700 | F   | 771454978669 | 1981-08-11 | BOMB |  401641 | 234  S.v.road Opp. Railway Station Andheri, Mumbai                                     | NULL | NULL | NULL |
+			| R003 | PALLAVI BAKALE          | 8199987657 | F   | 451453478721 | 1987-09-02 | PUNE |  400600 | 49  Wafa Chs Laxmibe Cheda Marg Nalasopara, Pune                                       | NULL | NULL | NULL |
+			| R004 | SAIRAJ VINAYAK HEGISHTE | 9099095765 | M   | 311359998759 | 1988-01-11 | BOMB |  400631 | Mittal Chambers Yogakshema , Mumbai                                                    | NULL | NULL | NULL |
+			| S001 | SOHAM BALAKRISHNAN K    | 8882395788 | M   | 781259788721 | 1994-01-12 | BOMB |  402026 | 2/3 Shri Gurudutta Krupa Chs R B Mehta Road Patel Chowk Near Rly Station, THANE        | NULL | NULL | NULL |
+			| S002 | SOHAN VISHNU GOWDA      | 9702394487 | M   | 568759783456 | 1994-01-12 | BOMB |  401121 | 424  Plot No  Persipolis Prem Sec  Vashi Navi Mumba                                    | NULL | NULL | NULL |
+			| S003 | RITESH MAHESH SHIKNE    | 7920211781 | M   | 432259788711 | 1994-01-12 | PUNE |  401025 | 42 -b-c Mahavir Bldg Navneet Showroom Bhandark Matunga,,PUNE                           | NULL | NULL | NULL |
+			| S004 | MARTINRAJ JOHNRAJ NADAR | 8202300001 | M   | 761259788123 | 1994-01-12 | NAGP |  401111 | NULL                                                                                   | NULL | NULL | NULL |
+			| S005 | KALPESH JOTIBA PATIL    | 8802225722 | M   | 566549788541 | 1994-01-12 | DELH |  401012 | 40   Khetwadi Main Road Dr Bhajekar Street Behind Harkisandas Hospital Khetwadi, DELHI | NULL | NULL | NULL |
+			| S006 | JABIN JAGADEESAN NADAR  | 7602393181 | M   | 331259788776 | 1994-01-12 | CHEN |  401113 | 156  Opp Remson Co Ganesh Nagar Charkop Kandivli, CHENNAI                              | NULL | NULL | NULL |
+			| S007 | CHAITANYA ABHAY GHATKAR | 7502395745 | M   | 560259788709 | 1994-01-12 | BEED |  401020 | NULL                                                                                   | NULL | NULL | NULL |
+			+------+-------------------------+------------+-----+--------------+------------+------+---------+----------------------------------------------------------------------------------------+------+------+------+
+
+SELECT * FROM EMP ORDER BY ENUM;
+			+------+-----------+--------+-----+----------+------+------+--------+------------+------+------+------+
+			| ENUM | BASIC_SAL | DEPTNO | JOB | HOLIDAYS | CITY | HRA  | TOTSAL | HIREDATE   | EX1  | EX2  | EX3  |
+			+------+-----------+--------+-----+----------+------+------+--------+------------+------+------+------+
+			| F001 |     34000 | F      | M   |        0 | BOMB |  0.5 |  51000 | 1988-09-21 | NULL | NULL | NULL |
+			| F002 |     30000 | F      | S   |        0 | BOMB |  0.5 |  45000 | 1991-08-25 | NULL | NULL | NULL |
+			| F003 |     25000 | F      | W   |        0 | BOMB |  0.5 |  37500 | 1998-09-21 | NULL | NULL | NULL |
+			| F004 |     22000 | F      | W   |        0 | BOMB |  0.5 |  33000 | 2004-11-01 | NULL | NULL | NULL |
+			| P001 |     32000 | P      | M   |        0 | BOMB |  0.5 |  48000 | 1992-05-19 | NULL | NULL | NULL |
+			| P002 |     23000 | P      | S   |        0 | BOMB |  0.5 |  34500 | 1997-04-18 | NULL | NULL | NULL |
+			| P003 |     20000 | P      | W   |        0 | BOMB |  0.5 |  30000 | 2004-03-29 | NULL | NULL | NULL |
+			| P004 |     19000 | P      | W   |        0 | BOMB |  0.5 |  28500 | 2010-09-08 | NULL | NULL | NULL |
+			| P005 |     18000 | P      | W   |        0 | BOMB |  0.5 |  27000 | 2015-09-21 | NULL | NULL | NULL |
+			| R001 |     34000 | R      | M   |        0 | BOMB |  0.5 |  51000 | 1999-12-11 | NULL | NULL | NULL |
+			| R002 |     31000 | R      | S   |        0 | BOMB |  0.5 |  46500 | 2006-07-27 | NULL | NULL | NULL |
+			| R003 |     25000 | R      | W   |        0 | PUNE |  0.5 |  37500 | 2010-04-01 | NULL | NULL | NULL |
+			| R004 |     21000 | R      | W   |        0 | BOMB |  0.5 |  31500 | 2015-05-19 | NULL | NULL | NULL |
+			| S001 |     34000 | S      | M   |        0 | BOMB |  0.5 |  51000 | 1990-09-20 | NULL | NULL | NULL |
+			| S002 |     21000 | S      | W   |        0 | BOMB |  0.5 |  31500 | 2010-08-10 | NULL | NULL | NULL |
+			| S003 |     20000 | S      | W   |        0 | PUNE |  0.5 |  30000 | 2012-01-11 | NULL | NULL | NULL |
+			| S004 |     20000 | S      | W   |        0 | NAGP |  0.4 |  28000 | 2016-09-13 | NULL | NULL | NULL |
+			| S005 |     19000 | S      | W   |        0 | DELH |  0.5 |  28500 | 2017-02-15 | NULL | NULL | NULL |
+			| S006 |     18500 | S      | W   |        0 | CHEN |  0.5 |  27750 | 2018-07-23 | NULL | NULL | NULL |
+			| S007 |     17000 | S      | W   |        0 | BEED |  0.4 |  23800 | 2019-05-02 | NULL | NULL | NULL |
+			+------+-----------+--------+-----+----------+------+------+--------+------------+------+------+------+
+			
+SELECT * FROM SALESMAN ORDER BY SNUM;
+			+------+------+------+
+			| SNUM | COMM | LOC  |
+			+------+------+------+
+			| S002 | 0.05 | BOMB |
+			| S003 | 0.05 | PUNE |
+			| S004 | 0.04 | NAGP |
+			| S005 | 0.04 | DELH |
+			| S006 | 0.03 | CHEN |
+			| S007 | 0.03 | BEED |
+			+------+------+------+
+			
+SELECT * FROM EMP_AUDIT ORDER BY SR_NO DESC;
+			+-------+------+-----------------+---------------------+--------------------------------------------+
+			| SR_NO | ENUM | USER            | TIME_STAMP          | REMARK                                     |
+			+-------+------+-----------------+---------------------+--------------------------------------------+
+			|    40 | S007 | DEVIP@localhost | 2022-05-24 13:04:23 | S007 HRA=0.4 AND DETAILS ADDED SUCESSFULLY |
+			|    39 | S006 | DEVIP@localhost | 2022-05-24 13:04:23 | S006 HRA=0.5 AND DETAILS ADDED SUCESSFULLY |
+			|    38 | S005 | DEVIP@localhost | 2022-05-24 13:04:23 | S005 HRA=0.5 AND DETAILS ADDED SUCESSFULLY |
+			|    37 | S004 | DEVIP@localhost | 2022-05-24 13:04:23 | S004 HRA=0.4 AND DETAILS ADDED SUCESSFULLY |
+			|    36 | S003 | DEVIP@localhost | 2022-05-24 13:04:23 | S003 HRA=0.5 AND DETAILS ADDED SUCESSFULLY |
+			|    35 | S002 | DEVIP@localhost | 2022-05-24 13:04:23 | S002 HRA=0.5 AND DETAILS ADDED SUCESSFULLY |
+			|    34 | S001 | DEVIP@localhost | 2022-05-24 13:04:23 | S001 HRA=0.5 AND DETAILS ADDED SUCESSFULLY |
+			|    33 | P005 | DEVIP@localhost | 2022-05-24 13:04:23 | P005 HRA=0.5 AND DETAILS ADDED SUCESSFULLY |
+			|    32 | P004 | DEVIP@localhost | 2022-05-24 13:04:23 | P004 HRA=0.5 AND DETAILS ADDED SUCESSFULLY |
+			|    31 | P003 | DEVIP@localhost | 2022-05-24 13:04:23 | P003 HRA=0.5 AND DETAILS ADDED SUCESSFULLY |
+			|    30 | P002 | DEVIP@localhost | 2022-05-24 13:04:23 | P002 HRA=0.5 AND DETAILS ADDED SUCESSFULLY |
+			|    29 | P001 | DEVIP@localhost | 2022-05-24 13:04:23 | P001 HRA=0.5 AND DETAILS ADDED SUCESSFULLY |
+			|    28 | R004 | DEVIP@localhost | 2022-05-24 13:04:23 | R004 HRA=0.5 AND DETAILS ADDED SUCESSFULLY |
+			|    27 | R003 | DEVIP@localhost | 2022-05-24 13:04:23 | R003 HRA=0.5 AND DETAILS ADDED SUCESSFULLY |
+			|    26 | R002 | DEVIP@localhost | 2022-05-24 13:04:23 | R002 HRA=0.5 AND DETAILS ADDED SUCESSFULLY |
+			|    25 | R001 | DEVIP@localhost | 2022-05-24 13:04:23 | R001 HRA=0.5 AND DETAILS ADDED SUCESSFULLY |
+			|    24 | F004 | DEVIP@localhost | 2022-05-24 13:04:23 | F004 HRA=0.5 AND DETAILS ADDED SUCESSFULLY |
+			|    23 | F003 | DEVIP@localhost | 2022-05-24 13:04:23 | F003 HRA=0.5 AND DETAILS ADDED SUCESSFULLY |
+			|    22 | F002 | DEVIP@localhost | 2022-05-24 13:04:23 | F002 HRA=0.5 AND DETAILS ADDED SUCESSFULLY |
+			|    21 | F001 | DEVIP@localhost | 2022-05-24 13:04:23 | F001 HRA=0.5 AND DETAILS ADDED SUCESSFULLY |
+			|    20 | S007 | DEVIP@localhost | 2022-05-24 13:00:42 | S007 EMPLOYEE ADDED SUCESSFULLY            |
+			|    19 | S006 | DEVIP@localhost | 2022-05-24 13:00:42 | S006 EMPLOYEE ADDED SUCESSFULLY            |
+			|    18 | S005 | DEVIP@localhost | 2022-05-24 13:00:42 | S005 EMPLOYEE ADDED SUCESSFULLY            |
+			|    17 | S004 | DEVIP@localhost | 2022-05-24 13:00:42 | S004 EMPLOYEE ADDED SUCESSFULLY            |
+			|    16 | S003 | DEVIP@localhost | 2022-05-24 13:00:42 | S003 EMPLOYEE ADDED SUCESSFULLY            |
+			+-------+------+-----------------+---------------------+--------------------------------------------+
+			
+		
+================================================================= CUST TABLE ===========================================================================================
+CREATE TABLE CUST(
+	CNUM INT PRIMARY KEY AUTO_INCREMENT, 
+	SNUM CHAR(4),
+	CNAME VARCHAR(25) NOT NULL,
+	CITY varchar(25) NOT NULL,
+	RATING TINYINT NOT NULL,
+	EX1 FLOAT,
+	EX2 VARCHAR(25),
+	UNIQUE (CNAME, CITY),
+	CONSTRAINT FK_SALESMAN_CUST FOREIGN KEY(SNUM)
+	REFERENCES SALESMAN (SNUM) 
+);
+
+
+===================================================== AFTER INSERT TRIGGER FOR CUST TABLE ===========================================================================================
+DELIMITER //
+CREATE TRIGGER AI_CUST
+AFTER INSERT
+ON CUST FOR EACH ROW
+BEGIN
+    INSERT INTO EMP_AUDIT VALUES (NULL, 0, USER(), SYSDATE(), CONCAT(NEW.CNAME, ' CUSTOMER ADDED SUCESSFULLY'));
+END; //
+DELIMITER ;
+DROP TRIGGER AI_CUST;
+
+
+===================================================== AFTER UPDATE TRIGGER FOR CUST TABLE ===========================================================================================
+DELIMITER //
+CREATE TRIGGER AU_CUST
+AFTER UPDATE
+ON CUST FOR EACH ROW
+BEGIN
+    IF (OLD.SNUM != NEW.SNUM ) THEN
+		INSERT INTO EMP_AUDIT VALUES (NULL, NEW.CNUM, USER(), SYSDATE(), CONCAT('CUSTOMER ALLOCATED SALESMAN ', NEW.SNUM,' SUCESSFULLY'));
+	ELSEIF (OLD.CNAME != NEW.CNAME) THEN
+		INSERT INTO EMP_AUDIT VALUES (NULL, NEW.CNUM, USER(), SYSDATE(), CONCAT('CUSTOMER NAME CHANGED TO ', NEW.CNAME,' FROM ', OLD.CNAME, 'SUCESSFULLY'));
+	ELSEIF (OLD.CITY != NEW.CITY) THEN
+		INSERT INTO EMP_AUDIT VALUES (NULL, NEW.CNUM, USER(), SYSDATE(), CONCAT('CUSTOMER CITY CHANGED TO ', NEW.CITY,' FROM ', OLD.CITY, 'SUCESSFULLY'));
+	ELSEIF (OLD.RATING != NEW.RATING) THEN
+		INSERT INTO EMP_AUDIT VALUES (NULL, NEW.CNUM, USER(), SYSDATE(), CONCAT('CUSTOMER RATING CHANGED TO ', NEW.RATING,' FROM ', OLD.RATING, 'SUCESSFULLY'));
+	END IF;
+END; //
+DELIMITER ;
+DROP TRIGGER AU_CUST;
+
+
+======================================================== INSERT STATEMENTS FOR CUST TABLE ==================================================================================
+INSERT INTO CUST(CNAME, CITY, RATING) VALUES
+('AKSHAY JAGTAP','BOMB',8),
+('DEVI DINESH','DELH',9),
+('ANIKET PATTIWAR','PUNE',6),
+('DISHI KANADE ','CHEN',4),
+('DIVYANI INGLE','NAGP',7),
+('ASHOK PATE','BOMB',5),
+('ANUJ GAONKAR','BEED',10),
+('ARVIND BIRADAR','DELH',3);
+
+SELECT * FROM CUST ORDER BY CNUM;
+			+------+------+-----------------+------+--------+------+------+
+			| CNUM | SNUM | CNAME           | CITY | RATING | EX1  | EX2  |
+			+------+------+-----------------+------+--------+------+------+
+			|    1 | NULL | AKSHAY JAGTAP   | BOMB |      8 | NULL | NULL |
+			|    2 | NULL | DEVI DINESH     | DELH |      9 | NULL | NULL |
+			|    3 | NULL | ANIKET PATTIWAR | PUNE |      6 | NULL | NULL |
+			|    4 | NULL | DISHI KANADE    | CHEN |      4 | NULL | NULL |
+			|    5 | NULL | DIVYANI INGLE   | NAGP |      7 | NULL | NULL |
+			|    6 | NULL | ASHOK PATE      | BOMB |      5 | NULL | NULL |
+			|    7 | NULL | ANUJ GAONKAR    | BEED |     10 | NULL | NULL |
+			|    8 | NULL | ARVIND BIRADAR  | DELH |      3 | NULL | NULL |
+			+------+------+-----------------+------+--------+------+------+
+			
+SELECT * FROM EMP_AUDIT ORDER BY SR_NO DESC;
+			+-------+------+------------------+---------------------+--------------------------------------------+
+			| SR_NO | ENUM | USER             | TIME_STAMP          | REMARK                                     |
+			+-------+------+------------------+---------------------+--------------------------------------------+
+			|    48 | 0    | ANIKET@localhost | 2022-05-24 13:06:55 | ARVIND BIRADAR CUSTOMER ADDED SUCESSFULLY  |
+			|    47 | 0    | ANIKET@localhost | 2022-05-24 13:06:55 | ANUJ GAONKAR CUSTOMER ADDED SUCESSFULLY    |
+			|    46 | 0    | ANIKET@localhost | 2022-05-24 13:06:55 | ASHOK PATE CUSTOMER ADDED SUCESSFULLY      |
+			|    45 | 0    | ANIKET@localhost | 2022-05-24 13:06:55 | DIVYANI INGLE CUSTOMER ADDED SUCESSFULLY   |
+			|    44 | 0    | ANIKET@localhost | 2022-05-24 13:06:55 | DISHI KANADE  CUSTOMER ADDED SUCESSFULLY   |
+			|    43 | 0    | ANIKET@localhost | 2022-05-24 13:06:55 | ANIKET PATTIWAR CUSTOMER ADDED SUCESSFULLY |
+			|    42 | 0    | ANIKET@localhost | 2022-05-24 13:06:55 | DEVI DINESH CUSTOMER ADDED SUCESSFULLY     |
+			|    41 | 0    | ANIKET@localhost | 2022-05-24 13:06:55 | AKSHAY JAGTAP CUSTOMER ADDED SUCESSFULLY   |
+			|    40 | S007 | DEVIP@localhost  | 2022-05-24 13:04:23 | S007 HRA=0.4 AND DETAILS ADDED SUCESSFULLY |
+			|    39 | S006 | DEVIP@localhost  | 2022-05-24 13:04:23 | S006 HRA=0.5 AND DETAILS ADDED SUCESSFULLY |
+			|    38 | S005 | DEVIP@localhost  | 2022-05-24 13:04:23 | S005 HRA=0.5 AND DETAILS ADDED SUCESSFULLY |
+			|    37 | S004 | DEVIP@localhost  | 2022-05-24 13:04:23 | S004 HRA=0.4 AND DETAILS ADDED SUCESSFULLY |
+			|    36 | S003 | DEVIP@localhost  | 2022-05-24 13:04:23 | S003 HRA=0.5 AND DETAILS ADDED SUCESSFULLY |
+			|    35 | S002 | DEVIP@localhost  | 2022-05-24 13:04:23 | S002 HRA=0.5 AND DETAILS ADDED SUCESSFULLY |
+			+-------+------+------------------+---------------------+--------------------------------------------+
+
+
+======================================================== PROCEDURE CUST_SALESMAN_ALLOCATION =============================================================================
+DELIMITER //
+CREATE PROCEDURE CUST_SALESMAN_ALLOCATION (CNO INT)
+BEGIN
+	DECLARE TEMP_CITY CHAR(4);
+    DECLARE SNO CHAR(4);
+    SELECT CITY INTO TEMP_CITY FROM CUST WHERE CNUM=CNO; 
+    SELECT SNUM INTO SNO FROM SALESMAN WHERE LOC=TEMP_CITY;
+    UPDATE CUST SET SNUM=SNO WHERE CNUM=CNO;
+	INSERT INTO EMP_AUDIT VALUES (NULL, SNO, USER(), SYSDATE(), CONCAT('SALESMAN ALLOCATED TO CUSTOMER ', CNO ,' SUCESSFULLY'));
+END; //
+DELIMITER ;
+DROP PROCEDURE CUST_SALESMAN_ALLOCATION;
+
+
+========================================= CALL TO PROCEDURE CUST_SALESMAN_ALLOCATION FOR EACH CUSTOMER ADDED =====================================================================
+CALL CUST_SALESMAN_ALLOCATION(1);
+CALL CUST_SALESMAN_ALLOCATION(2);
+CALL CUST_SALESMAN_ALLOCATION(3);
+CALL CUST_SALESMAN_ALLOCATION(4);
+CALL CUST_SALESMAN_ALLOCATION(5);
+CALL CUST_SALESMAN_ALLOCATION(6);
+CALL CUST_SALESMAN_ALLOCATION(7);
+
+SELECT * FROM CUST ORDER BY CNUM;
+			+------+------+-----------------+------+--------+------+------+
+			| CNUM | SNUM | CNAME           | CITY | RATING | EX1  | EX2  |
+			+------+------+-----------------+------+--------+------+------+
+			|    1 | S002 | AKSHAY JAGTAP   | BOMB |      8 | NULL | NULL |
+			|    2 | S005 | DEVI DINESH     | DELH |      9 | NULL | NULL |
+			|    3 | S003 | ANIKET PATTIWAR | PUNE |      6 | NULL | NULL |
+			|    4 | S006 | DISHI KANADE    | CHEN |      4 | NULL | NULL |
+			|    5 | S004 | DIVYANI INGLE   | NAGP |      7 | NULL | NULL |
+			|    6 | S002 | ASHOK PATE      | BOMB |      5 | NULL | NULL |
+			|    7 | S007 | ANUJ GAONKAR    | BEED |     10 | NULL | NULL |
+			|    8 | S005 | ARVIND BIRADAR  | DELH |      3 | NULL | NULL |
+			+------+------+-----------------+------+--------+------+------+
+			
+SELECT * FROM EMP_AUDIT ORDER BY SR_NO DESC;
+			+-------+------+------------------+---------------------+----------------------------------------------+
+			| SR_NO | ENUM | USER             | TIME_STAMP          | REMARK                                       |
+			+-------+------+------------------+---------------------+----------------------------------------------+
+			|    56 | S005 | ANIKET@localhost | 2022-05-24 13:23:10 | SALESMAN ALLOCATED TO CUSTOMER 8 SUCESSFULLY |
+			|    55 | S007 | ANIKET@localhost | 2022-05-24 13:23:09 | SALESMAN ALLOCATED TO CUSTOMER 7 SUCESSFULLY |
+			|    54 | S002 | ANIKET@localhost | 2022-05-24 13:23:08 | SALESMAN ALLOCATED TO CUSTOMER 6 SUCESSFULLY |
+			|    53 | S004 | ANIKET@localhost | 2022-05-24 13:23:07 | SALESMAN ALLOCATED TO CUSTOMER 5 SUCESSFULLY |
+			|    52 | S006 | ANIKET@localhost | 2022-05-24 13:23:06 | SALESMAN ALLOCATED TO CUSTOMER 4 SUCESSFULLY |
+			|    51 | S003 | ANIKET@localhost | 2022-05-24 13:23:05 | SALESMAN ALLOCATED TO CUSTOMER 3 SUCESSFULLY |
+			|    50 | S005 | ANIKET@localhost | 2022-05-24 13:23:04 | SALESMAN ALLOCATED TO CUSTOMER 2 SUCESSFULLY |
+			|    49 | S002 | ANIKET@localhost | 2022-05-24 13:23:03 | SALESMAN ALLOCATED TO CUSTOMER 1 SUCESSFULLY |
+			|    48 | 0    | ANIKET@localhost | 2022-05-24 13:19:46 | ARVIND BIRADAR CUSTOMER ADDED SUCESSFULLY    |
+			|    47 | 0    | ANIKET@localhost | 2022-05-24 13:19:46 | ANUJ GAONKAR CUSTOMER ADDED SUCESSFULLY      |
+			|    46 | 0    | ANIKET@localhost | 2022-05-24 13:19:46 | ASHOK PATE CUSTOMER ADDED SUCESSFULLY        |
+			|    45 | 0    | ANIKET@localhost | 2022-05-24 13:19:46 | DIVYANI INGLE CUSTOMER ADDED SUCESSFULLY     |
+			+-------+------+------------------+---------------------+----------------------------------------------+
+			
+
+=============================================================== ORDERS TABLE ===========================================================================================
+CREATE TABLE ORDERS
+(
+	ONUM INT PRIMARY KEY,
+	CNUM INT,
+	SNUM CHAR(4),
+	ORDER_UNIT INT NOT NULL,
+	AMT FLOAT,
+	ORDER_DATE DATE,
+	STATUSS VARCHAR(25) DEFAULT 'ORDER_PLACED',
+	BATCH_NO VARCHAR(25),
+    CONSTRAINT FK_CUST_ORDERS FOREIGN KEY (CNUM)
+    REFERENCES CUST (CNUM),
+    UNIQUE (CNUM, ORDER_DATE)
+);
+
+
+======================================================= PROCEDURE CHECK_AVAILABILITY ===========================================================================================
+DELIMITER //
+CREATE PROCEDURE CHECK_AVAILABILITY(ODATE DATE)
+BEGIN
+	DECLARE PRESENT INT;
+    DECLARE REQUIRED INT;
+    SELECT SUM(UNITS) INTO PRESENT FROM PROD;
+    SELECT SUM(ORDER_UNIT) INTO REQUIRED FROM ORDERS;
+    IF(PRESENT-REQUIRED)<0 THEN
+		CALL PRODUCTION_REQUEST(ODATE);
+    END IF;
+END; //
+DELIMITER ;
+			
+			
+========================================================== PROCEDURE OLD_ORDER_ENTRY ===========================================================================================
+DELIMITER //
+CREATE PROCEDURE OLD_ORDER_ENTRY(CNO INT, ORDER_UNIT INT,  ORDER_DATE DATE, STATUSS VARCHAR(25), BATCH_NO VARCHAR(25))
+BEGIN
+	DECLARE ONUM INT;
+	DECLARE AMT FLOAT;
+    DECLARE SNO CHAR(4);
+	SET ONUM=FLOOR(RAND()*(100000-0+1))+0;  
+	SET AMT=500*ORDER_UNIT;
+    SELECT SNUM INTO SNO FROM CUST WHERE CNUM=CNO;
+	INSERT INTO  ORDERS VALUES(ONUM,CNO,SNO,ORDER_UNIT,AMT,ORDER_DATE,STATUSS, BATCH_NO);
+    INSERT INTO INCM_EXP_TALLY VALUES ('I', AMT, ORDER_DATE, CONCAT(ONUM, ' INCOME'));
+    CALL CHECK_AVAILABILITY(ORDER_DATE);
+END; //
+DELIMITER ;
+
+
+========================================================== PROCEDURE NEW_ORDER_ENTRY ===========================================================================================
+DELIMITER //
+CREATE PROCEDURE NEW_ORDER_ENTRY(CNO INT, ORDER_UNIT INT,  ORDER_DATE DATE)
+BEGIN
+	DECLARE ONUM INT;
+	DECLARE AMT FLOAT;
+    DECLARE SNO CHAR(4);
+	SET ONUM=FLOOR(RAND()*(100000-0+1))+0;  
+	SET AMT=500*ORDER_UNIT;
+    SELECT SNUM INTO SNO FROM CUST WHERE CNUM=CNO;
+	INSERT INTO ORDERS (ONUM, CNUM, SNUM, ORDER_UNIT, AMT, ORDER_DATE)
+    VALUES(ONUM,CNO,SNO,ORDER_UNIT,AMT,ORDER_DATE);
+    INSERT INTO EMP_AUDIT VALUES (NULL, SNO, USER(), SYSDATE(), CONCAT('ORDER NO: ',ONUM, ' PLACED FOR CUST NO: ',CNO, ' BY EMP NO: ', SNO));
+    INSERT INTO INCM_EXP_TALLY VALUES ('I', AMT, ORDER_DATE, CONCAT(ONUM, ' INCOME'));
+    CALL CHECK_AVAILABILITY(ORDER_DATE);
+END; //
+DELIMITER ;
+
+
+============================================================== INCM_EXP_TALLY TABLE ===========================================================================================
+CREATE TABLE INCM_EXP_TALLY
+(
+	HEAD CHAR(1)
+    CONSTRAINT CH_INCM_EXP_TALLY_HEAD CHECK (HEAD IN ('I', 'E', 'P', 'L')),
+    AMT FLOAT,
+    ENTRY_DATE DATETIME,
+    REMARK VARCHAR(200) 
+);
+
+
+=============================================================== PROD TABLE ===========================================================================================
+CREATE TABLE PROD
+(
+	BATCH_NO INT PRIMARY KEY AUTO_INCREMENT,
+	PRO_DATE DATE,
+    UNITS INT DEFAULT 500
+);
+
+SET @PRO_UNIT=500;
+SET @RAW_COST=140;
+SET @BASIC_PROD_COST=75;
+
+
+======================================================= PROCEDURE PRODUCTION_REQUEST ===========================================================================================
+DELIMITER //
+CREATE PROCEDURE PRODUCTION_REQUEST(PDATE DATE)
+BEGIN
+	DECLARE PROD_COST FLOAT;
+    INSERT INTO PROD (PRO_DATE) VALUES (DATE(SYSDATE()));
+    SET PROD_COST = @PRO_UNIT*(@BASIC_PROD_COST+@RAW_COST);
+    INSERT INTO EMP_AUDIT VALUES (NULL, '0', USER(), SYSDATE(), CONCAT(' PRODUCTION REQUEST PLACED SUCESSFULLY'));
+    INSERT INTO INCM_EXP_TALLY VALUES ('E', PROD_COST, PDATE, 'PRODUCTION COST');
+END; //
+DELIMITER ;
+DROP PROCEDURE PRODUCTION_REQUEST;
+
+CALL PRODUCTION_REQUEST('2020-09-01');
+
+SELECT * FROM PROD ORDER BY PRO_DATE DESC;
+			+----------+------------+-------+
+			| BATCH_NO | PRO_DATE   | UNITS |
+			+----------+------------+-------+
+			|        1 | 2022-05-24 |   500 |
+			+----------+------------+-------+
+
+SELECT * FROM EMP_AUDIT ORDER BY SR_NO DESC;
+			+-------+------+------------------+---------------------+----------------------------------------------+
+			| SR_NO | ENUM | USER             | TIME_STAMP          | REMARK                                       |
+			+-------+------+------------------+---------------------+----------------------------------------------+
+			|    57 | 0    | AKSHAY@localhost | 2022-05-24 18:21:47 |  PRODUCTION REQUEST PLACED SUCESSFULLY       |
+			|    56 | S005 | ANIKET@localhost | 2022-05-24 18:21:22 | SALESMAN ALLOCATED TO CUSTOMER 8 SUCESSFULLY |
+			|    55 | S007 | ANIKET@localhost | 2022-05-24 18:21:21 | SALESMAN ALLOCATED TO CUSTOMER 7 SUCESSFULLY |
+			|    54 | S002 | ANIKET@localhost | 2022-05-24 18:21:20 | SALESMAN ALLOCATED TO CUSTOMER 6 SUCESSFULLY |
+			+-------+------+------------------+---------------------+----------------------------------------------+
+			
+SELECT * FROM INCM_EXP_TALLY ORDER BY ENTRY_DATE DESC;
+			+------+--------+---------------------+-----------------+
+			| HEAD | AMT    | ENTRY_DATE          | REMARK          |
+			+------+--------+---------------------+-----------------+
+			| E    | 107500 | 2020-09-01 00:00:00 | PRODUCTION COST |
+			+------+--------+---------------------+-----------------+
+			
+			
+
+========================================================= INSERT VALUES INTO ORDERS TABLE ===========================================================================================
+CALL OLD_ORDER_ENTRY(3,250,'2020-09-01','DELIVERED','1');
+CALL OLD_ORDER_ENTRY(1,500,'2020-11-15','DELIVERED','1,2');
+CALL OLD_ORDER_ENTRY(3,450,'2020-12-01','DELIVERED','2,3');
+CALL OLD_ORDER_ENTRY(7,700,'2021-01-01','DELIVERED','3,4');
+CALL OLD_ORDER_ENTRY(8,300,'2021-03-05','DELIVERED','4,5');
+CALL OLD_ORDER_ENTRY(2,750,'2021-04-05','DELIVERED','5,6');
+CALL OLD_ORDER_ENTRY(1,800,'2021-06-30','DELIVERED','6,7,8');
+CALL OLD_ORDER_ENTRY(6,500,'2021-09-15','DELIVERED','8,9');
+CALL OLD_ORDER_ENTRY(4,250,'2021-11-15','DELIVERED','9');
+CALL OLD_ORDER_ENTRY(2,300,'2021-03-12','DELIVERED','10');
+CALL OLD_ORDER_ENTRY(5,500,'2022-04-24','IN_TRANSIT','10,11');
+CALL OLD_ORDER_ENTRY(4,750,'2022-05-01','IN_TRANSIT','11,12');
+CALL OLD_ORDER_ENTRY(3,900,'2022-05-12','PROCESSING', NULL);
+CALL NEW_ORDER_ENTRY(1,600, '2022-05-15');
+CALL NEW_ORDER_ENTRY(6,800,'2022-05-21');
+
+SELECT * FROM ORDERS ORDER BY ORDER_DATE DESC;
+			+-------+------+------+------------+--------+------------+--------------+----------+
+			| ONUM  | CNUM | SNUM | ORDER_UNIT | AMT    | ORDER_DATE | STATUSS      | BATCH_NO |
+			+-------+------+------+------------+--------+------------+--------------+----------+
+			| 91731 |    6 | S002 |        800 | 400000 | 2022-05-21 | ORDER_PLACED | NULL     |
+			| 53894 |    1 | S002 |        600 | 300000 | 2022-05-15 | ORDER_PLACED | NULL     |
+			| 25912 |    3 | S003 |        900 | 450000 | 2022-05-12 | PROCESSING   | NULL     |
+			| 58557 |    4 | S006 |        750 | 375000 | 2022-05-01 | IN_TRANSIT   | 11,12    |
+			| 55623 |    5 | S004 |        500 | 250000 | 2022-04-24 | IN_TRANSIT   | 10,11    |
+			| 47881 |    4 | S006 |        250 | 125000 | 2021-11-15 | DELIVERED    | 9        |
+			| 66517 |    6 | S002 |        500 | 250000 | 2021-09-15 | DELIVERED    | 8,9      |
+			| 94902 |    1 | S002 |        800 | 400000 | 2021-06-30 | DELIVERED    | 6,7,8    |
+			| 35997 |    2 | S005 |        750 | 375000 | 2021-04-05 | DELIVERED    | 5,6      |
+			| 39853 |    2 | S005 |        300 | 150000 | 2021-03-12 | DELIVERED    | 10       |
+			| 57492 |    8 | S005 |        300 | 150000 | 2021-03-05 | DELIVERED    | 4,5      |
+			| 41921 |    7 | S007 |        700 | 350000 | 2021-01-01 | DELIVERED    | 3,4      |
+			| 50705 |    3 | S003 |        450 | 225000 | 2020-12-01 | DELIVERED    | 2,3      |
+			| 37202 |    1 | S002 |        500 | 250000 | 2020-11-15 | DELIVERED    | 1,2      |
+			| 45101 |    3 | S003 |        250 | 125000 | 2020-09-01 | DELIVERED    | 1        |
+			+-------+------+------+------------+--------+------------+--------------+----------+
+
+SELECT * FROM EMP_AUDIT ORDER BY SR_NO DESC;
+			+-------+------+------------------+---------------------+-------------------------------------------------------+
+			| SR_NO | ENUM | USER             | TIME_STAMP          | REMARK                                                |
+			+-------+------+------------------+---------------------+-------------------------------------------------------+
+			|    73 | 0    | AKSHAY@localhost | 2022-05-24 18:26:52 |  PRODUCTION REQUEST PLACED SUCESSFULLY                |
+			|    72 | S002 | AKSHAY@localhost | 2022-05-24 18:26:52 | ORDER NO: 71666 PLACED FOR CUST NO: 6 BY EMP NO: S002 |
+			|    71 | 0    | AKSHAY@localhost | 2022-05-24 18:26:51 |  PRODUCTION REQUEST PLACED SUCESSFULLY                |
+			|    70 | S002 | AKSHAY@localhost | 2022-05-24 18:26:51 | ORDER NO: 51140 PLACED FOR CUST NO: 1 BY EMP NO: S002 |
+			|    69 | 0    | AKSHAY@localhost | 2022-05-24 18:26:50 |  PRODUCTION REQUEST PLACED SUCESSFULLY                |
+			|    68 | 0    | AKSHAY@localhost | 2022-05-24 18:26:49 |  PRODUCTION REQUEST PLACED SUCESSFULLY                |
+			|    67 | 0    | AKSHAY@localhost | 2022-05-24 18:26:48 |  PRODUCTION REQUEST PLACED SUCESSFULLY                |
+			|    66 | 0    | AKSHAY@localhost | 2022-05-24 18:26:48 |  PRODUCTION REQUEST PLACED SUCESSFULLY                |
+			|    65 | 0    | AKSHAY@localhost | 2022-05-24 18:26:47 |  PRODUCTION REQUEST PLACED SUCESSFULLY                |
+			|    64 | 0    | AKSHAY@localhost | 2022-05-24 18:26:46 |  PRODUCTION REQUEST PLACED SUCESSFULLY                |
+			|    63 | 0    | AKSHAY@localhost | 2022-05-24 18:26:45 |  PRODUCTION REQUEST PLACED SUCESSFULLY                |
+			|    62 | 0    | AKSHAY@localhost | 2022-05-24 18:26:44 |  PRODUCTION REQUEST PLACED SUCESSFULLY                |
+			|    61 | 0    | AKSHAY@localhost | 2022-05-24 18:26:43 |  PRODUCTION REQUEST PLACED SUCESSFULLY                |
+			|    60 | 0    | AKSHAY@localhost | 2022-05-24 18:26:42 |  PRODUCTION REQUEST PLACED SUCESSFULLY                |
+			|    59 | 0    | AKSHAY@localhost | 2022-05-24 18:26:41 |  PRODUCTION REQUEST PLACED SUCESSFULLY                |
+			|    58 | 0    | AKSHAY@localhost | 2022-05-24 18:26:40 |  PRODUCTION REQUEST PLACED SUCESSFULLY                |
+			|    57 | 0    | AKSHAY@localhost | 2022-05-24 18:21:47 |  PRODUCTION REQUEST PLACED SUCESSFULLY                |
+			|    56 | S005 | ANIKET@localhost | 2022-05-24 18:21:22 | SALESMAN ALLOCATED TO CUSTOMER 8 SUCESSFULLY          |
+			|    55 | S007 | ANIKET@localhost | 2022-05-24 18:21:21 | SALESMAN ALLOCATED TO CUSTOMER 7 SUCESSFULLY          |
+			+-------+------+------------------+---------------------+-------------------------------------------------------+
+
+SELECT * FROM INCM_EXP_TALLY ORDER BY ENTRY_DATE DESC;
+			+------+--------+---------------------+-----------------+
+			| HEAD | AMT    | ENTRY_DATE          | REMARK          |
+			+------+--------+---------------------+-----------------+
+			| I    | 400000 | 2022-05-21 00:00:00 | 71666 INCOME    |
+			| E    | 107500 | 2022-05-21 00:00:00 | PRODUCTION COST |
+			| I    | 300000 | 2022-05-15 00:00:00 | 51140 INCOME    |
+			| E    | 107500 | 2022-05-15 00:00:00 | PRODUCTION COST |
+			| I    | 450000 | 2022-05-12 00:00:00 | 61345 INCOME    |
+			| E    | 107500 | 2022-05-12 00:00:00 | PRODUCTION COST |
+			| I    | 375000 | 2022-05-01 00:00:00 | 18528 INCOME    |
+			| E    | 107500 | 2022-05-01 00:00:00 | PRODUCTION COST |
+			| I    | 250000 | 2022-04-24 00:00:00 | 77099 INCOME    |
+			| E    | 107500 | 2022-04-24 00:00:00 | PRODUCTION COST |
+			| I    | 125000 | 2021-11-15 00:00:00 | 67060 INCOME    |
+			| E    | 107500 | 2021-11-15 00:00:00 | PRODUCTION COST |
+			| I    | 250000 | 2021-09-15 00:00:00 | 59881 INCOME    |
+			| E    | 107500 | 2021-09-15 00:00:00 | PRODUCTION COST |
+			| I    | 400000 | 2021-06-30 00:00:00 | 44115 INCOME    |
+			| E    | 107500 | 2021-06-30 00:00:00 | PRODUCTION COST |
+			| I    | 375000 | 2021-04-05 00:00:00 | 20231 INCOME    |
+			| E    | 107500 | 2021-04-05 00:00:00 | PRODUCTION COST |
+			| I    | 150000 | 2021-03-12 00:00:00 | 55656 INCOME    |
+			| E    | 107500 | 2021-03-12 00:00:00 | PRODUCTION COST |
+			| I    | 150000 | 2021-03-05 00:00:00 | 19014 INCOME    |
+			| E    | 107500 | 2021-03-05 00:00:00 | PRODUCTION COST |
+			| I    | 350000 | 2021-01-01 00:00:00 | 58280 INCOME    |
+			| E    | 107500 | 2021-01-01 00:00:00 | PRODUCTION COST |
+			| I    | 225000 | 2020-12-01 00:00:00 | 57462 INCOME    |
+			| E    | 107500 | 2020-12-01 00:00:00 | PRODUCTION COST |
+			| I    | 250000 | 2020-11-15 00:00:00 | 9676 INCOME     |
+			| E    | 107500 | 2020-11-15 00:00:00 | PRODUCTION COST |
+			| E    | 107500 | 2020-09-01 00:00:00 | PRODUCTION COST |
+			| I    | 125000 | 2020-09-01 00:00:00 | 96974 INCOME    |
+			+------+--------+---------------------+-----------------+
+
+
+======================================================== PROCEDURE ORDER_STATUS_UPDATE ===========================================================================================
+DELIMITER //
+CREATE PROCEDURE ORDER_STATUS_UPDATE(ENO CHAR(4), ONO INT, STAT VARCHAR(25), BATCH VARCHAR(25))
+BEGIN
+	UPDATE ORDERS SET STATUSS=STAT, BATCH_NO=BATCH WHERE ONUM=ONO;
+    IF(LENGTH(STAT) = 0) THEN
+		INSERT INTO EMP_AUDIT VALUES (NULL, ENO, USER(), SYSDATE(), CONCAT('ORDER NO: ',ONO, ' STATUS UPDATED TO ', STAT));
+	ELSE
+		INSERT INTO EMP_AUDIT VALUES (NULL, ENO, USER(), SYSDATE(), CONCAT('ORDER NO: ',ONO, ' NOT FOUND FOR UPDATE'));
+	END IF;
+END; //
+DELIMITER ;
+
+CALL ORDER_STATUS_UPDATE('P003', 73498, 'DELIVERED', '12');
+CALL ORDER_STATUS_UPDATE('P002', 83152, 'DELIVERED', '12,13');
+CALL ORDER_STATUS_UPDATE('P003', 61345, 'DELIVERED', '12,13');
+
+SELECT * FROM ORDERS ORDER BY ORDER_DATE DESC;
+			+-------+------+------+------------+--------+------------+--------------+----------+
+			| ONUM  | CNUM | SNUM | ORDER_UNIT | AMT    | ORDER_DATE | STATUSS      | BATCH_NO |
+			+-------+------+------+------------+--------+------------+--------------+----------+
+			| 71666 |    6 | S002 |        800 | 400000 | 2022-05-21 | ORDER_PLACED | NULL     |
+			| 51140 |    1 | S002 |        600 | 300000 | 2022-05-15 | ORDER_PLACED | NULL     |
+			| 61345 |    3 | S003 |        900 | 450000 | 2022-05-12 | DELIVERED    | 12,13    |
+			| 18528 |    4 | S006 |        750 | 375000 | 2022-05-01 | IN_TRANSIT   | 11,12    |
+			| 77099 |    5 | S004 |        500 | 250000 | 2022-04-24 | IN_TRANSIT   | 10,11    |
+			| 67060 |    4 | S006 |        250 | 125000 | 2021-11-15 | DELIVERED    | 9        |
+			| 59881 |    6 | S002 |        500 | 250000 | 2021-09-15 | DELIVERED    | 8,9      |
+			| 44115 |    1 | S002 |        800 | 400000 | 2021-06-30 | DELIVERED    | 6,7,8    |
+			| 20231 |    2 | S005 |        750 | 375000 | 2021-04-05 | DELIVERED    | 5,6      |
+			| 55656 |    2 | S005 |        300 | 150000 | 2021-03-12 | DELIVERED    | 10       |
+			| 19014 |    8 | S005 |        300 | 150000 | 2021-03-05 | DELIVERED    | 4,5      |
+			| 58280 |    7 | S007 |        700 | 350000 | 2021-01-01 | DELIVERED    | 3,4      |
+			| 57462 |    3 | S003 |        450 | 225000 | 2020-12-01 | DELIVERED    | 2,3      |
+			|  9676 |    1 | S002 |        500 | 250000 | 2020-11-15 | DELIVERED    | 1,2      |
+			| 96974 |    3 | S003 |        250 | 125000 | 2020-09-01 | DELIVERED    | 1        |
+			+-------+------+------+------------+--------+------------+--------------+----------+
+
+SELECT * FROM EMP_AUDIT ORDER BY TIME_STAMP DESC;
+			+-------+------+------------------+---------------------+-------------------------------------------------------+
+			| SR_NO | ENUM | USER             | TIME_STAMP          | REMARK                                                |
+			+-------+------+------------------+---------------------+-------------------------------------------------------+
+			|    76 | P003 | AKSHAY@localhost | 2022-05-24 19:16:15 | ORDER NO: 61345 STATUS UPDATED TO DELIVERED           |
+			|    75 | P002 | AKSHAY@localhost | 2022-05-24 19:14:51 | ORDER NO: 83152 NOT FOUND FOR UPDATE                  |
+			|    74 | P003 | AKSHAY@localhost | 2022-05-24 19:14:50 | ORDER NO: 73498 NOT FOUND FOR UPDATE                  |
+			|    73 | 0    | AKSHAY@localhost | 2022-05-24 18:26:52 |  PRODUCTION REQUEST PLACED SUCESSFULLY                |
+			|    72 | S002 | AKSHAY@localhost | 2022-05-24 18:26:52 | ORDER NO: 71666 PLACED FOR CUST NO: 6 BY EMP NO: S002 |
+			+-------+------+------------------+---------------------+-------------------------------------------------------+
+			
+			
+================================================================== FUNCTION TOTSALCAL ===========================================================================================
+DELIMITER //
+CREATE FUNCTION TOTSALCAL(EMPNO CHAR(4), H FLOAT)
+RETURNS FLOAT
+DETERMINISTIC
+BEGIN
+	DECLARE SALARY FLOAT;
+    DECLARE SALPDAY FLOAT;
+    DECLARE HOLI TINYINT;
+    DECLARE COM FLOAT;
+    DECLARE TOT FLOAT;
+    SELECT BASIC_SAL, HOLIDAYS INTO SALARY, HOLI FROM EMP
+    WHERE ENUM=EMPNO;
+    SET SALPDAY=SALARY/30;
+	SET TOT=SALARY-(SALPDAY*HOLI)+(H*SALARY);
+    RETURN TOT;
+END; //
+DELIMITER ;
+
+
+================================================================ PROCEDURE SALES_COMMISSION ===========================================================================================
+DELIMITER //
+CREATE PROCEDURE SALES_COMMISSION()
+BEGIN
+	DECLARE COM FLOAT;
+    DECLARE ORD_TOT FLOAT;
+    DECLARE SNO CHAR(4);
+    DECLARE HRA_TEMP FLOAT;
+    DECLARE FINAL_COMM FLOAT;
+    DECLARE H INT DEFAULT 0;
+    DECLARE CU CURSOR FOR 
+    SELECT SALESMAN.SNUM, COMM, HRA, SUM(AMT) FROM ORDERS,EMP, SALESMAN
+    WHERE ORDERS.SNUM=SALESMAN.SNUM AND SALESMAN.SNUM=EMP.ENUM
+    AND MONTH(ORDER_DATE)=MONTH(SYSDATE()) AND YEAR(ORDER_DATE)=YEAR(SYSDATE())
+    GROUP BY SALESMAN.SNUM;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET H=1;
+    OPEN CU ;
+		CU_LOOP:LOOP
+			FETCH CU INTO SNO, COM, HRA_TEMP, ORD_TOT;
+            IF H=1 THEN
+				LEAVE CU_LOOP;
+			END IF;
+            UPDATE EMP SET TOTSAL=TOTSALCAL(SNO, HRA_TEMP)+(COM*ORD_TOT) WHERE ENUM=SNO;
+            INSERT INTO EMP_AUDIT VALUES (NULL,SNO, USER(), SYSDATE(), CONCAT(SNO,' MONTHLY SAL+COMMISSION UPDATED IN TOTAL SALARY'));
+        END LOOP CU_LOOP;
+    CLOSE CU;
+END; //
+DELIMITER ;
+
+
+================================================================== PROCEDURE MONTHLY_SAL ===========================================================================================
+DELIMITER //
+CREATE PROCEDURE MONTHLY_SAL()
+BEGIN
+	DECLARE ENO CHAR(4);
+    DECLARE TEMP_HRA FLOAT;
+    DECLARE FINAL_SAL FLOAT;
+    DECLARE H INT DEFAULT 0;
+    DECLARE CU CURSOR FOR 
+    SELECT ENUM, HRA FROM EMP WHERE ENUM NOT LIKE 'S%' OR ENUM='S001';
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET H=1;
+    OPEN CU ;
+		CU_LOOP:LOOP
+			FETCH CU INTO ENO, TEMP_HRA;
+            IF H=1 THEN
+				LEAVE CU_LOOP;
+			END IF;
+            SET FINAL_SAL=TOTSALCAL(ENO, TEMP_HRA);
+            UPDATE EMP SET TOTSAL=FINAL_SAL WHERE ENUM=ENO;
+            INSERT INTO EMP_AUDIT VALUES (ENO, USER(), SYSDATE(), CONCAT(ENO,' MONTHLY SAL UPDATED IN TOTAL SALARY'));
+        END LOOP CU_LOOP;
+    CLOSE CU;
+    CALL SALES_COMMISSION();
+END; //
+DELIMITER ;
+
+CALL MONTHLY_SAL;
+
+SELECT * FROM EMP ORDER BY ENUM;
+			+------+-----------+--------+-----+----------+------+------+--------+------------+------+------+------+
+			| ENUM | BASIC_SAL | DEPTNO | JOB | HOLIDAYS | CITY | HRA  | TOTSAL | HIREDATE   | EX1  | EX2  | EX3  |
+			+------+-----------+--------+-----+----------+------+------+--------+------------+------+------+------+
+			| F001 |     34000 | F      | M   |        0 | BOMB |  0.5 |  51000 | 1988-09-21 | NULL | NULL | NULL |
+			| F002 |     30000 | F      | S   |        0 | BOMB |  0.5 |  45000 | 1991-08-25 | NULL | NULL | NULL |
+			| F003 |     25000 | F      | W   |        0 | BOMB |  0.5 |  37500 | 1998-09-21 | NULL | NULL | NULL |
+			| F004 |     22000 | F      | W   |        0 | BOMB |  0.5 |  33000 | 2004-11-01 | NULL | NULL | NULL |
+			| P001 |     32000 | P      | M   |        0 | BOMB |  0.5 |  48000 | 1992-05-19 | NULL | NULL | NULL |
+			| P002 |     23000 | P      | S   |        0 | BOMB |  0.5 |  34500 | 1997-04-18 | NULL | NULL | NULL |
+			| P003 |     20000 | P      | W   |        0 | BOMB |  0.5 |  30000 | 2004-03-29 | NULL | NULL | NULL |
+			| P004 |     19000 | P      | W   |        0 | BOMB |  0.5 |  28500 | 2010-09-08 | NULL | NULL | NULL |
+			| P005 |     18000 | P      | W   |        0 | BOMB |  0.5 |  27000 | 2015-09-21 | NULL | NULL | NULL |
+			| R001 |     34000 | R      | M   |        0 | BOMB |  0.5 |  51000 | 1999-12-11 | NULL | NULL | NULL |
+			| R002 |     31000 | R      | S   |        0 | BOMB |  0.5 |  46500 | 2006-07-27 | NULL | NULL | NULL |
+			| R003 |     25000 | R      | W   |        0 | PUNE |  0.5 |  37500 | 2010-04-01 | NULL | NULL | NULL |
+			| R004 |     21000 | R      | W   |        0 | BOMB |  0.5 |  31500 | 2015-05-19 | NULL | NULL | NULL |
+			| S001 |     34000 | S      | M   |        0 | BOMB |  0.5 |  51000 | 1990-09-20 | NULL | NULL | NULL |
+			| S002 |     21000 | S      | W   |        0 | BOMB |  0.5 |  66500 | 2010-08-10 | NULL | NULL | NULL |
+			| S003 |     20000 | S      | W   |        0 | PUNE |  0.5 |  52500 | 2012-01-11 | NULL | NULL | NULL |
+			| S004 |     20000 | S      | W   |        0 | NAGP |  0.4 |  28000 | 2016-09-13 | NULL | NULL | NULL |
+			| S005 |     19000 | S      | W   |        0 | DELH |  0.5 |  28500 | 2017-02-15 | NULL | NULL | NULL |
+			| S006 |     18500 | S      | W   |        0 | CHEN |  0.5 |  39000 | 2018-07-23 | NULL | NULL | NULL |
+			| S007 |     17000 | S      | W   |        0 | BEED |  0.4 |  23800 | 2019-05-02 | NULL | NULL | NULL |
+			+------+-----------+--------+-----+----------+------+------+--------+------------+------+------+------+
+
+SELECT * FROM EMP_AUDIT ORDER BY SR_NO DESC;
+			+-------+------+------------------+---------------------+-------------------------------------------------------+
+			| SR_NO | ENUM | USER             | TIME_STAMP          | REMARK                                                |
+			+-------+------+------------------+---------------------+-------------------------------------------------------+
+			|    93 | S003 | DEVIP@localhost  | 2022-05-24 19:20:41 | S003 MONTHLY SAL+COMMISSION UPDATED IN TOTAL SALARY   |
+			|    92 | S002 | DEVIP@localhost  | 2022-05-24 19:20:41 | S002 MONTHLY SAL+COMMISSION UPDATED IN TOTAL SALARY   |
+			|    91 | S006 | DEVIP@localhost  | 2022-05-24 19:20:41 | S006 MONTHLY SAL+COMMISSION UPDATED IN TOTAL SALARY   |
+			|    90 | S001 | DEVIP@localhost  | 2022-05-24 19:20:41 | S001 MONTHLY SAL UPDATED IN TOTAL SALARY              |
+			|    89 | R004 | DEVIP@localhost  | 2022-05-24 19:20:41 | R004 MONTHLY SAL UPDATED IN TOTAL SALARY              |
+			|    88 | R003 | DEVIP@localhost  | 2022-05-24 19:20:41 | R003 MONTHLY SAL UPDATED IN TOTAL SALARY              |
+			|    87 | R002 | DEVIP@localhost  | 2022-05-24 19:20:41 | R002 MONTHLY SAL UPDATED IN TOTAL SALARY              |
+			|    86 | R001 | DEVIP@localhost  | 2022-05-24 19:20:41 | R001 MONTHLY SAL UPDATED IN TOTAL SALARY              |
+			|    85 | P005 | DEVIP@localhost  | 2022-05-24 19:20:41 | P005 MONTHLY SAL UPDATED IN TOTAL SALARY              |
+			|    84 | P004 | DEVIP@localhost  | 2022-05-24 19:20:41 | P004 MONTHLY SAL UPDATED IN TOTAL SALARY              |
+			|    83 | P003 | DEVIP@localhost  | 2022-05-24 19:20:41 | P003 MONTHLY SAL UPDATED IN TOTAL SALARY              |
+			|    82 | P002 | DEVIP@localhost  | 2022-05-24 19:20:41 | P002 MONTHLY SAL UPDATED IN TOTAL SALARY              |
+			|    81 | P001 | DEVIP@localhost  | 2022-05-24 19:20:41 | P001 MONTHLY SAL UPDATED IN TOTAL SALARY              |
+			|    80 | F004 | DEVIP@localhost  | 2022-05-24 19:20:41 | F004 MONTHLY SAL UPDATED IN TOTAL SALARY              |
+			|    79 | F003 | DEVIP@localhost  | 2022-05-24 19:20:41 | F003 MONTHLY SAL UPDATED IN TOTAL SALARY              |
+			|    78 | F002 | DEVIP@localhost  | 2022-05-24 19:20:41 | F002 MONTHLY SAL UPDATED IN TOTAL SALARY              |
+			|    77 | F001 | DEVIP@localhost  | 2022-05-24 19:20:41 | F001 MONTHLY SAL UPDATED IN TOTAL SALARY              |
+			|    76 | P003 | AKSHAY@localhost | 2022-05-24 19:16:15 | ORDER NO: 61345 STATUS UPDATED TO DELIVERED           |
+			|    75 | P002 | AKSHAY@localhost | 2022-05-24 19:14:51 | ORDER NO: 83152 STATUS UPDATED TO IN-TRANSIT          |
+			+-------+------+------------------+---------------------+-------------------------------------------------------+
+			
+			
+================================================================== PROCEDURE MONTHLY_EXP ===========================================================================================
+DELIMITER //
+CREATE PROCEDURE MONTHLY_EXP(MON VARCHAR(15), ELE FLOAT, RENT FLOAT, MISC FLOAT)
+BEGIN
+	DECLARE EXP FLOAT;
+    DECLARE INC FLOAT;
+    DECLARE BALANCE FLOAT;
+    DECLARE SALARY FLOAT;
+    INSERT INTO INCM_EXP_TALLY VALUES ('E', ELE, SYSDATE(), CONCAT(MONTHNAME(SYSDATE()),'-',YEAR(SYSDATE()), ' ELECTRICITY BILL'));
+	INSERT INTO INCM_EXP_TALLY VALUES ('E', RENT, SYSDATE(), CONCAT(MONTHNAME(SYSDATE()),'-',YEAR(SYSDATE()), ' RENT EXPENDITURE'));
+    INSERT INTO INCM_EXP_TALLY VALUES ('E', MISC, SYSDATE(), CONCAT(MONTHNAME(SYSDATE()),'-',YEAR(SYSDATE()), ' MISCELLANEOUS EXPENDITURE'));
+    SELECT SUM(TOTSAL) INTO SALARY FROM EMP;
+    INSERT INTO INCM_EXP_TALLY VALUES ('E', SALARY, SYSDATE(), CONCAT(MONTHNAME(SYSDATE()),'-',YEAR(SYSDATE()), ' SALARY OF EMPLOYEES'));
+    SELECT SUM(AMT) INTO EXP FROM INCM_EXP_TALLY 
+    WHERE HEAD='E' AND MONTHNAME(ENTRY_DATE)=MON AND YEAR(ENTRY_DATE)=YEAR(SYSDATE()) GROUP BY HEAD;
+    SELECT SUM(AMT) INTO INC FROM INCM_EXP_TALLY 
+    WHERE HEAD='I' AND MONTHNAME(ENTRY_DATE)=MON AND YEAR(ENTRY_DATE)=YEAR(SYSDATE()) GROUP BY HEAD;
+    SET BALANCE=INC-EXP;
+    IF BALANCE>0 THEN
+		INSERT INTO INCM_EXP_TALLY VALUES ('P', BALANCE, SYSDATE(), CONCAT('PROFIT ', MONTHNAME(SYSDATE()),'-',YEAR(SYSDATE())));
+	ELSE
+        INSERT INTO INCM_EXP_TALLY VALUES ('L', BALANCE, SYSDATE(), CONCAT('LOSS ', MONTHNAME(SYSDATE()),'-',YEAR(SYSDATE())));
+    END IF;
+END; //
+DELIMITER ;
+
+CALL MONTHLY_EXP('MAY', 25000, 75000, 102000);
+
+SELECT * FROM INCM_EXP_TALLY ORDER BY ENTRY_DATE DESC;
+			+------+--------+---------------------+------------------------------------+
+			| HEAD | AMT    | ENTRY_DATE          | REMARK                             |
+			+------+--------+---------------------+------------------------------------+
+			| P    | 102700 | 2022-05-24 19:36:42 | PROFIT May-2022                    |
+			| E    | 790300 | 2022-05-24 19:36:42 | May-2022 SALARY OF EMPLOYEES       |
+			| E    | 102000 | 2022-05-24 19:36:42 | May-2022 MISCELLANEOUS EXPENDITURE |
+			| E    |  75000 | 2022-05-24 19:36:42 | May-2022 RENT EXPENDITURE          |
+			| E    |  25000 | 2022-05-24 19:36:42 | May-2022 ELECTRICITY BILL          |
+			| E    | 107500 | 2022-05-21 00:00:00 | PRODUCTION COST                    |
+			| I    | 400000 | 2022-05-21 00:00:00 | 71666 INCOME                       |
+			| E    | 107500 | 2022-05-15 00:00:00 | PRODUCTION COST                    |
+			| I    | 300000 | 2022-05-15 00:00:00 | 51140 INCOME                       |
+			| E    | 107500 | 2022-05-12 00:00:00 | PRODUCTION COST                    |
+			| I    | 450000 | 2022-05-12 00:00:00 | 61345 INCOME                       |
+			| E    | 107500 | 2022-05-01 00:00:00 | PRODUCTION COST                    |
+			| I    | 375000 | 2022-05-01 00:00:00 | 18528 INCOME                       |
+			| I    | 250000 | 2022-04-24 00:00:00 | 77099 INCOME                       |
+			| E    | 107500 | 2022-04-24 00:00:00 | PRODUCTION COST                    |
+			| E    | 107500 | 2021-11-15 00:00:00 | PRODUCTION COST                    |
+			| I    | 125000 | 2021-11-15 00:00:00 | 67060 INCOME                       |
+			| E    | 107500 | 2021-09-15 00:00:00 | PRODUCTION COST                    |
+			| I    | 250000 | 2021-09-15 00:00:00 | 59881 INCOME                       |
+			| E    | 107500 | 2021-06-30 00:00:00 | PRODUCTION COST                    |
+			| I    | 400000 | 2021-06-30 00:00:00 | 44115 INCOME                       |
+			| E    | 107500 | 2021-04-05 00:00:00 | PRODUCTION COST                    |
+			| I    | 375000 | 2021-04-05 00:00:00 | 20231 INCOME                       |
+			| I    | 150000 | 2021-03-12 00:00:00 | 55656 INCOME                       |
+			| E    | 107500 | 2021-03-12 00:00:00 | PRODUCTION COST                    |
+			| E    | 107500 | 2021-03-05 00:00:00 | PRODUCTION COST                    |
+			| I    | 150000 | 2021-03-05 00:00:00 | 19014 INCOME                       |
+			| E    | 107500 | 2021-01-01 00:00:00 | PRODUCTION COST                    |
+			| I    | 350000 | 2021-01-01 00:00:00 | 58280 INCOME                       |
+			| E    | 107500 | 2020-12-01 00:00:00 | PRODUCTION COST                    |
+			| I    | 225000 | 2020-12-01 00:00:00 | 57462 INCOME                       |
+			| E    | 107500 | 2020-11-15 00:00:00 | PRODUCTION COST                    |
+			| I    | 250000 | 2020-11-15 00:00:00 | 9676 INCOME                        |
+			| I    | 125000 | 2020-09-01 00:00:00 | 96974 INCOME                       |
+			| E    | 107500 | 2020-09-01 00:00:00 | PRODUCTION COST                    |
+			+------+--------+---------------------+------------------------------------+
+
+SELECT * FROM EMP_AUDIT ORDER BY SR_NO DESC;
+			+-------+------+------------------+---------------------+-------------------------------------------------------+
+			| SR_NO | ENUM | USER             | TIME_STAMP          | REMARK                                                |
+			+-------+------+------------------+---------------------+-------------------------------------------------------+
+			|    93 | S003 | DEVIP@localhost  | 2022-05-24 19:20:41 | S003 MONTHLY SAL+COMMISSION UPDATED IN TOTAL SALARY   |
+			|    92 | S002 | DEVIP@localhost  | 2022-05-24 19:20:41 | S002 MONTHLY SAL+COMMISSION UPDATED IN TOTAL SALARY   |
+			|    91 | S006 | DEVIP@localhost  | 2022-05-24 19:20:41 | S006 MONTHLY SAL+COMMISSION UPDATED IN TOTAL SALARY   |
+			|    90 | S001 | DEVIP@localhost  | 2022-05-24 19:20:41 | S001 MONTHLY SAL UPDATED IN TOTAL SALARY              |
+			|    89 | R004 | DEVIP@localhost  | 2022-05-24 19:20:41 | R004 MONTHLY SAL UPDATED IN TOTAL SALARY              |
+			|    88 | R003 | DEVIP@localhost  | 2022-05-24 19:20:41 | R003 MONTHLY SAL UPDATED IN TOTAL SALARY              |
+			|    87 | R002 | DEVIP@localhost  | 2022-05-24 19:20:41 | R002 MONTHLY SAL UPDATED IN TOTAL SALARY              |
+			|    86 | R001 | DEVIP@localhost  | 2022-05-24 19:20:41 | R001 MONTHLY SAL UPDATED IN TOTAL SALARY              |
+			|    85 | P005 | DEVIP@localhost  | 2022-05-24 19:20:41 | P005 MONTHLY SAL UPDATED IN TOTAL SALARY              |
+			|    84 | P004 | DEVIP@localhost  | 2022-05-24 19:20:41 | P004 MONTHLY SAL UPDATED IN TOTAL SALARY              |
+			|    83 | P003 | DEVIP@localhost  | 2022-05-24 19:20:41 | P003 MONTHLY SAL UPDATED IN TOTAL SALARY              |
+			|    82 | P002 | DEVIP@localhost  | 2022-05-24 19:20:41 | P002 MONTHLY SAL UPDATED IN TOTAL SALARY              |
+			|    81 | P001 | DEVIP@localhost  | 2022-05-24 19:20:41 | P001 MONTHLY SAL UPDATED IN TOTAL SALARY              |
+			|    80 | F004 | DEVIP@localhost  | 2022-05-24 19:20:41 | F004 MONTHLY SAL UPDATED IN TOTAL SALARY              |
+			|    79 | F003 | DEVIP@localhost  | 2022-05-24 19:20:41 | F003 MONTHLY SAL UPDATED IN TOTAL SALARY              |
+			|    78 | F002 | DEVIP@localhost  | 2022-05-24 19:20:41 | F002 MONTHLY SAL UPDATED IN TOTAL SALARY              |
+			|    77 | F001 | DEVIP@localhost  | 2022-05-24 19:20:41 | F001 MONTHLY SAL UPDATED IN TOTAL SALARY              |
+			|    76 | P003 | AKSHAY@localhost | 2022-05-24 19:16:15 | ORDER NO: 61345 STATUS UPDATED TO DELIVERED           |
+			|    75 | P002 | AKSHAY@localhost | 2022-05-24 19:14:51 | ORDER NO: 83152 STATUS UPDATED TO IN-TRANSIT          |
+			|    74 | P003 | AKSHAY@localhost | 2022-05-24 19:14:50 | ORDER NO: 73498 STATUS UPDATED TO DELIVERED           |
+			|    73 | 0    | AKSHAY@localhost | 2022-05-24 18:26:52 |  PRODUCTION REQUEST PLACED SUCESSFULLY                |
+			|    72 | S002 | AKSHAY@localhost | 2022-05-24 18:26:52 | ORDER NO: 71666 PLACED FOR CUST NO: 6 BY EMP NO: S002 |
+			|    71 | 0    | AKSHAY@localhost | 2022-05-24 18:26:51 |  PRODUCTION REQUEST PLACED SUCESSFULLY                |
+			|    70 | S002 | AKSHAY@localhost | 2022-05-24 18:26:51 | ORDER NO: 51140 PLACED FOR CUST NO: 1 BY EMP NO: S002 |
+			|    69 | 0    | AKSHAY@localhost | 2022-05-24 18:26:50 |  PRODUCTION REQUEST PLACED SUCESSFULLY                |
+			|    68 | 0    | AKSHAY@localhost | 2022-05-24 18:26:49 |  PRODUCTION REQUEST PLACED SUCESSFULLY                |
+			|    67 | 0    | AKSHAY@localhost | 2022-05-24 18:26:48 |  PRODUCTION REQUEST PLACED SUCESSFULLY                |
+			|    66 | 0    | AKSHAY@localhost | 2022-05-24 18:26:48 |  PRODUCTION REQUEST PLACED SUCESSFULLY                |
+			|    65 | 0    | AKSHAY@localhost | 2022-05-24 18:26:47 |  PRODUCTION REQUEST PLACED SUCESSFULLY                |
+			|    64 | 0    | AKSHAY@localhost | 2022-05-24 18:26:46 |  PRODUCTION REQUEST PLACED SUCESSFULLY                |
+			|    63 | 0    | AKSHAY@localhost | 2022-05-24 18:26:45 |  PRODUCTION REQUEST PLACED SUCESSFULLY                |
+			|    62 | 0    | AKSHAY@localhost | 2022-05-24 18:26:44 |  PRODUCTION REQUEST PLACED SUCESSFULLY                |
+			|    61 | 0    | AKSHAY@localhost | 2022-05-24 18:26:43 |  PRODUCTION REQUEST PLACED SUCESSFULLY                |
+			|    60 | 0    | AKSHAY@localhost | 2022-05-24 18:26:42 |  PRODUCTION REQUEST PLACED SUCESSFULLY                |
+			|    59 | 0    | AKSHAY@localhost | 2022-05-24 18:26:41 |  PRODUCTION REQUEST PLACED SUCESSFULLY                |
+			|    58 | 0    | AKSHAY@localhost | 2022-05-24 18:26:40 |  PRODUCTION REQUEST PLACED SUCESSFULLY                |
+			|    57 | 0    | AKSHAY@localhost | 2022-05-24 18:21:47 |  PRODUCTION REQUEST PLACED SUCESSFULLY                |
+			|    56 | S005 | ANIKET@localhost | 2022-05-24 18:21:22 | SALESMAN ALLOCATED TO CUSTOMER 8 SUCESSFULLY          |
+			|    55 | S007 | ANIKET@localhost | 2022-05-24 18:21:21 | SALESMAN ALLOCATED TO CUSTOMER 7 SUCESSFULLY          |
+			|    54 | S002 | ANIKET@localhost | 2022-05-24 18:21:20 | SALESMAN ALLOCATED TO CUSTOMER 6 SUCESSFULLY          |
+			|    53 | S004 | ANIKET@localhost | 2022-05-24 18:21:19 | SALESMAN ALLOCATED TO CUSTOMER 5 SUCESSFULLY          |
+			|    52 | S006 | ANIKET@localhost | 2022-05-24 18:21:19 | SALESMAN ALLOCATED TO CUSTOMER 4 SUCESSFULLY          |
+			|    51 | S003 | ANIKET@localhost | 2022-05-24 18:21:18 | SALESMAN ALLOCATED TO CUSTOMER 3 SUCESSFULLY          |
+			|    50 | S005 | ANIKET@localhost | 2022-05-24 18:21:17 | SALESMAN ALLOCATED TO CUSTOMER 2 SUCESSFULLY          |
+			|    49 | S002 | ANIKET@localhost | 2022-05-24 18:21:16 | SALESMAN ALLOCATED TO CUSTOMER 1 SUCESSFULLY          |
+			|    48 | 0    | ANIKET@localhost | 2022-05-24 18:21:11 | ARVIND BIRADAR CUSTOMER ADDED SUCESSFULLY             |
+			|    47 | 0    | ANIKET@localhost | 2022-05-24 18:21:11 | ANUJ GAONKAR CUSTOMER ADDED SUCESSFULLY               |
+			|    46 | 0    | ANIKET@localhost | 2022-05-24 18:21:11 | ASHOK PATE CUSTOMER ADDED SUCESSFULLY                 |
+			|    45 | 0    | ANIKET@localhost | 2022-05-24 18:21:11 | DIVYANI INGLE CUSTOMER ADDED SUCESSFULLY              |
+			|    44 | 0    | ANIKET@localhost | 2022-05-24 18:21:11 | DISHI KANADE  CUSTOMER ADDED SUCESSFULLY              |
+			|    43 | 0    | ANIKET@localhost | 2022-05-24 18:21:11 | ANIKET PATTIWAR CUSTOMER ADDED SUCESSFULLY            |
+			|    42 | 0    | ANIKET@localhost | 2022-05-24 18:21:11 | DEVI DINESH CUSTOMER ADDED SUCESSFULLY                |
+			|    41 | 0    | ANIKET@localhost | 2022-05-24 18:21:11 | AKSHAY JAGTAP CUSTOMER ADDED SUCESSFULLY              |
+			|    40 | S007 | DEVIP@localhost  | 2022-05-24 18:21:01 | S007 HRA=0.4 AND DETAILS ADDED SUCESSFULLY            |
+			|    39 | S006 | DEVIP@localhost  | 2022-05-24 18:21:01 | S006 HRA=0.5 AND DETAILS ADDED SUCESSFULLY            |
+			|    38 | S005 | DEVIP@localhost  | 2022-05-24 18:21:01 | S005 HRA=0.5 AND DETAILS ADDED SUCESSFULLY            |
+			|    37 | S004 | DEVIP@localhost  | 2022-05-24 18:21:01 | S004 HRA=0.4 AND DETAILS ADDED SUCESSFULLY            |
+			|    36 | S003 | DEVIP@localhost  | 2022-05-24 18:21:01 | S003 HRA=0.5 AND DETAILS ADDED SUCESSFULLY            |
+			|    35 | S002 | DEVIP@localhost  | 2022-05-24 18:21:01 | S002 HRA=0.5 AND DETAILS ADDED SUCESSFULLY            |
+			|    34 | S001 | DEVIP@localhost  | 2022-05-24 18:21:01 | S001 HRA=0.5 AND DETAILS ADDED SUCESSFULLY            |
+			|    33 | P005 | DEVIP@localhost  | 2022-05-24 18:21:01 | P005 HRA=0.5 AND DETAILS ADDED SUCESSFULLY            |
+			|    32 | P004 | DEVIP@localhost  | 2022-05-24 18:21:01 | P004 HRA=0.5 AND DETAILS ADDED SUCESSFULLY            |
+			|    31 | P003 | DEVIP@localhost  | 2022-05-24 18:21:01 | P003 HRA=0.5 AND DETAILS ADDED SUCESSFULLY            |
+			|    30 | P002 | DEVIP@localhost  | 2022-05-24 18:21:01 | P002 HRA=0.5 AND DETAILS ADDED SUCESSFULLY            |
+			|    29 | P001 | DEVIP@localhost  | 2022-05-24 18:21:01 | P001 HRA=0.5 AND DETAILS ADDED SUCESSFULLY            |
+			|    28 | R004 | DEVIP@localhost  | 2022-05-24 18:21:01 | R004 HRA=0.5 AND DETAILS ADDED SUCESSFULLY            |
+			|    27 | R003 | DEVIP@localhost  | 2022-05-24 18:21:01 | R003 HRA=0.5 AND DETAILS ADDED SUCESSFULLY            |
+			|    26 | R002 | DEVIP@localhost  | 2022-05-24 18:21:01 | R002 HRA=0.5 AND DETAILS ADDED SUCESSFULLY            |
+			|    25 | R001 | DEVIP@localhost  | 2022-05-24 18:21:01 | R001 HRA=0.5 AND DETAILS ADDED SUCESSFULLY            |
+			|    24 | F004 | DEVIP@localhost  | 2022-05-24 18:21:01 | F004 HRA=0.5 AND DETAILS ADDED SUCESSFULLY            |
+			|    23 | F003 | DEVIP@localhost  | 2022-05-24 18:21:01 | F003 HRA=0.5 AND DETAILS ADDED SUCESSFULLY            |
+			|    22 | F002 | DEVIP@localhost  | 2022-05-24 18:21:01 | F002 HRA=0.5 AND DETAILS ADDED SUCESSFULLY            |
+			|    21 | F001 | DEVIP@localhost  | 2022-05-24 18:21:01 | F001 HRA=0.5 AND DETAILS ADDED SUCESSFULLY            |
+			|    20 | S007 | DEVIP@localhost  | 2022-05-24 18:20:58 | S007 EMPLOYEE ADDED SUCESSFULLY                       |
+			|    19 | S006 | DEVIP@localhost  | 2022-05-24 18:20:58 | S006 EMPLOYEE ADDED SUCESSFULLY                       |
+			|    18 | S005 | DEVIP@localhost  | 2022-05-24 18:20:58 | S005 EMPLOYEE ADDED SUCESSFULLY                       |
+			|    17 | S004 | DEVIP@localhost  | 2022-05-24 18:20:58 | S004 EMPLOYEE ADDED SUCESSFULLY                       |
+			|    16 | S003 | DEVIP@localhost  | 2022-05-24 18:20:58 | S003 EMPLOYEE ADDED SUCESSFULLY                       |
+			|    15 | S002 | DEVIP@localhost  | 2022-05-24 18:20:58 | S002 EMPLOYEE ADDED SUCESSFULLY                       |
+			|    14 | S001 | DEVIP@localhost  | 2022-05-24 18:20:58 | S001 EMPLOYEE ADDED SUCESSFULLY                       |
+			|    13 | P005 | DEVIP@localhost  | 2022-05-24 18:20:58 | P005 EMPLOYEE ADDED SUCESSFULLY                       |
+			|    12 | P004 | DEVIP@localhost  | 2022-05-24 18:20:58 | P004 EMPLOYEE ADDED SUCESSFULLY                       |
+			|    11 | P003 | DEVIP@localhost  | 2022-05-24 18:20:58 | P003 EMPLOYEE ADDED SUCESSFULLY                       |
+			|    10 | P002 | DEVIP@localhost  | 2022-05-24 18:20:58 | P002 EMPLOYEE ADDED SUCESSFULLY                       |
+			|     9 | P001 | DEVIP@localhost  | 2022-05-24 18:20:58 | P001 EMPLOYEE ADDED SUCESSFULLY                       |
+			|     8 | R004 | DEVIP@localhost  | 2022-05-24 18:20:58 | R004 EMPLOYEE ADDED SUCESSFULLY                       |
+			|     7 | R003 | DEVIP@localhost  | 2022-05-24 18:20:58 | R003 EMPLOYEE ADDED SUCESSFULLY                       |
+			|     6 | R002 | DEVIP@localhost  | 2022-05-24 18:20:58 | R002 EMPLOYEE ADDED SUCESSFULLY                       |
+			|     5 | R001 | DEVIP@localhost  | 2022-05-24 18:20:58 | R001 EMPLOYEE ADDED SUCESSFULLY                       |
+			|     4 | F004 | DEVIP@localhost  | 2022-05-24 18:20:58 | F004 EMPLOYEE ADDED SUCESSFULLY                       |
+			|     3 | F003 | DEVIP@localhost  | 2022-05-24 18:20:58 | F003 EMPLOYEE ADDED SUCESSFULLY                       |
+			|     2 | F002 | DEVIP@localhost  | 2022-05-24 18:20:58 | F002 EMPLOYEE ADDED SUCESSFULLY                       |
+			|     1 | F001 | DEVIP@localhost  | 2022-05-24 18:20:58 | F001 EMPLOYEE ADDED SUCESSFULLY                       |
+			+-------+------+------------------+---------------------+-------------------------------------------------------+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

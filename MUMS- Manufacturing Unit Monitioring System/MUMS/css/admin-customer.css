@@ -1,0 +1,135 @@
+* {
+    margin: 0;
+    padding: 0;
+    font-family: 'Philosopher', sans-serif;
+}
+
+body {
+    height: auto;
+    background-image: linear-gradient(to bottom right, rgba(0, 255, 255, 0.7), rgba(128, 0, 128, 0.7));
+}
+
+button,
+input {
+    font-size: large;
+    height: 30px;
+    width: 200px;
+    margin: 5px 15px;
+    box-sizing: border-box;
+    border-radius: 10px;
+    padding: 0px 8px;
+    border: none;
+    box-shadow: inset -3px -3px 3px rgba(0, 255, 255, 0.482),
+        5px 5px 10px rgb(0, 0, 0, 0.7);
+}
+
+button {
+    background-color: rgba(169, 255, 255, 0.837);
+}
+
+.stuff {
+    float: left;
+    width: 15%;
+    padding: 10px;
+}
+
+.tab {
+    float: left;
+    width: 65%;
+    padding: 10px;
+}
+
+.row:after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+#found {
+    font-size: large;
+    margin: 3px 15px;
+}
+
+
+header {
+    height: 30vh;
+    background-size: cover;
+    background-position: center;
+}
+
+ul {
+    float: right;
+    list-style-type: none;
+    margin-top: 35px;
+}
+
+ul li {
+    display: inline-block;
+
+}
+
+ul li a {
+    text-decoration: none;
+    border: none;
+    padding: 5px 10px;
+    font-size: 20px;
+    position: relative;
+    background: transparent;
+    color: rgba(128, 0, 128, 0.7);
+    text-transform: uppercase;
+    border: 3px solid rgba(128, 0, 128, 0.7);
+    cursor: pointer;
+    transition: all 0.7s;
+    overflow: hidden;
+    border-radius: 100px;
+}
+
+ul li a:hover {
+    background-color: black;
+    color: rgba(0, 255, 255, 0.7);
+    transition: 0.6s ease;
+}
+
+.logo img {
+    float: left;
+    width: 150px;
+    height: auto;
+}
+
+.main {
+    max-width: 1300px;
+    margin: auto;
+}
+
+#tblc,
+#tblo {
+    width: 70%;
+    margin: 40px 0px;
+    table-layout: auto;
+    border-collapse: collapse;
+}
+
+thead,
+tbody {
+    padding: 10px;
+}
+
+th,
+td {
+    text-align: center;
+    border: 2px solid black;
+    padding: 5px 10px;
+    border-color: rgba(162, 197, 231, 255);
+    font-family: Calibri, sans-serif;
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
+th {
+    background: rgba(91, 155, 213, 255);
+    color: white;
+}
+
+tr:nth-child(even) {
+    background-color: rgba(222, 234, 246, 255);
+}

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Philosopher:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/admin-orders.css">
+    <link rel="shortcut icon" href="../img/logo_no_name.png" type="image/x-icon">
+    <title>MUMS Admin-Orders</title>
+
+    <script>
+        window.addEventListener("DOMContentLoaded", () => {
+            console.log("Page load Successful");
+            const showAll = document.querySelector("#showAll");
+            const nonDel = document.querySelector("#nonDel");
+
+            showAll.addEventListener("click", () => {
+                console.log("All Orders Requested");
+                document.querySelector("#orderTable").style.visibility = "visible";
+                document.querySelector("#nonDelTable").style.visibility = "hidden";
+            });
+
+            nonDel.addEventListener("click", () => {
+                console.log("Non Delivered Orders Requested");
+                document.querySelector("#nonDelTable").style.visibility = "visible";
+                document.querySelector("#orderTable").style.visibility = "hidden";
+            });
+        });
+    </script>
+</head>
+
+<body>
+    <header>
+        <div class="main">
+            <div class="logo">
+                <img src="../img/logo.png">
+            </div>
+            <ul>
+                <li class="new_menu">
+                <li><a href="homepage.html">Home</a></li>
+                <li><a href="admin-customer.html">Customer</a></li>
+                <li><a href="admin-employee.html">Employee</a></li>
+                <li><a href="admin-orders.html">Orders</a></li>
+                <li><a href="admin-sal-exp.html">Salary/Expense</a></li>
+                <li><a href="admin-audit-log.html">Activity Log</a></li>
+            </ul>
+        </div>
+    </header>
+    <div class="cont" style="height: auto;">
+        <div style="display:flex ; justify-content:center;">
+            <h1>ORDERS</h1>
+        </div>
+        <br>
+        <hr style="height:4px; background-color: rgb(138, 101, 225);"><br>
+        <div class="cont">
+            <input type="text" name="onum" id="onum" placeholder="Order No.">
+            <img src="../img/admin_order_table.png" id="orderTable" alt="Order Table" style="visibility: hidden;">
+            <img src="../img/admin_order_non_delivered_table.png" id="nonDelTable" alt="Non Delivered Order Table"
+                style="visibility: hidden;">
+            <span id="msg"></span><br>
+            <input type="text" name="statuss" id="statuss" placeholder="Order Status"><br>
+            <input type="text" name="batch" id="batch" placeholder="Batch No."><br>
+            <button id="update">Update</button><br><br>
+            <button id="showAll">Show All Orders</button><br>
+            <button id="nonDel">Show Non-Delivered Orders</button><br><br>
+            <!-- <hr style="height:4px; background-color: rgb(138, 101, 225);"><br> -->
+        </div>
+    </div>
+
+</body>
+
+</html>

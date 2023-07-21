@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Philosopher:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/admin-sal-exp.css">
+    <link rel="shortcut icon" href="../img/logo_no_name.png" type="image/x-icon">
+    <title>MUMS Admin-Salary/Expense</title>
+
+    <script>
+        window.addEventListener("DOMContentLoaded", () => {
+            console.log("Page load Successful");
+            const sal = document.querySelector("#sal");
+            const exp = document.querySelector("#exp");
+
+            sal.addEventListener("click", () => {
+                console.log("Monthyly Salary Calculation request");
+                document.querySelector("#salTable").style.visibility = "visible";
+                document.querySelector("#ProfitLossTable").style.visibility = "hidden";
+            });
+
+            exp.addEventListener("click", () => {
+                console.log("Profit/Loss calculation request");
+                document.querySelector("#ProfitLossTable").style.visibility = "visible";
+                document.querySelector("#salTable").style.visibility = "hidden";
+            });
+        });
+    </script>
+
+</head>
+
+<body>
+    <header>
+        <div class="main">
+            <div class="logo">
+                <img src="../img/logo.png">
+            </div>
+            <ul>
+                <li class="new_menu">
+                <li><a href="homepage.html">Home</a></li>
+                <li><a href="admin-customer.html">Customer</a></li>
+                <li><a href="admin-employee.html">Employee</a></li>
+                <li><a href="admin-orders.html">Orders</a></li>
+                <li><a href="admin-sal-exp.html">Salary/Expense</a></li>
+                <li><a href="admin-audit-log.html">Activity Log</a></li>
+            </ul>
+    </header>
+    <div class="cont">
+        <div style="display:flex ; justify-content:center;">
+            <h1>EMPLOYEE SALARY</h1>
+        </div>
+        <br>
+        <hr style="height:4px; background-color: rgb(138, 101, 225);"><br>
+        <div class="stuff">
+            <button id="sal">Calculate Monthly Salary</button>
+            <img src="../img/monthly_sal.png" id="salTable" alt="Order Table" style="visibility: hidden;">
+            <img src="../img/monthly_exp_table.png" id="ProfitLossTable" alt="Order Table" style="visibility: hidden;">
+        </div>
+
+        <div class="stuff">
+            <br><br>
+            <P style="margin-left: 50px;">For the month of</P>
+            <select name="month" id="month" aria-placeholder="For the Month of">
+                <option value="JANUARY">JANUARY</option>
+                <option value="FEBRUARY">FEBRUARY</option>
+                <option value="MARCH">MARCH</option>
+                <option value="APRIL">APRIL</option>
+                <option value="MAY">MAY</option>
+                <option value="JUNE">JUNE</option>
+                <option value="JULY">JULY</option>
+                <option value="AUGUST">AUGUST</option>
+                <option value="SEPTEMBER">SEPTEMBER</option>
+                <option value="OCTOBER">OCTOBER</option>
+                <option value="NOVEMBER">NOVEMBER</option>
+                <option value="DECEMBER">DECEMBER</option>
+            </select>
+            <span id="msg"></span><br>
+            <input type="text" name="electricity" id="electricity" placeholder="Electricity Bill"><br>
+            <input type="text" name="rent" id="rent" placeholder="Infracture Rent/Lease Payment"><br>
+            <input type="text" name="misc" id="misc" placeholder="Miscellaneous Expense"><br>
+            <button id="exp">Calculate Profit/Loss</button>
+
+            <br><br>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Philosopher:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/admin-customer.css">
+    <link rel="shortcut icon" href="../img/logo_no_name.png" type="image/x-icon">
+    <script src="../js/admin-customer.js"></script>
+    <title>MUMS Admin-Customer</title>
+
+</head>
+
+<body>
+    <header>
+        <div class="main">
+            <div class="logo">
+                <img src="../img/logo.png">
+            </div>
+            <ul>
+                <li class="new_menu">
+                <li><a href="homepage.html">Home</a></li>
+                <li><a href="admin-customer.html">Customer</a></li>
+                <li><a href="admin-employee.html">Employee</a></li>
+                <li><a href="admin-orders.html">Orders</a></li>
+                <li><a href="admin-sal-exp.html">Salary/Expense</a></li>
+                <li><a href="admin-audit-log.html">Activity Log</a></li>
+            </ul>
+    </header>
+
+    <div class="cont">
+        <div style="display:flex ; justify-content:center;">
+            <h1>Customer Details</h1>
+        </div>
+        <br>
+        <hr style="height:4px; background-color: rgb(138, 101, 225);"><br>
+        <div class="row" ;>
+            <div class="stuff">
+                <br><span id="found"></span>
+                <br><input type="text" class="in" id="cnum" placeholder="Customer ID">
+                <br><input type="text" class="in" id="cname" placeholder="Customer Name">
+                <br><input type="text" class="in" id="rating" placeholder="Rating">
+                <br><input type="text" class="in" id="city" placeholder="City"><br><br>
+
+                <br><button class="bt" id="add" disabled>Add</button>
+                <br><button class="bt" id="delete" disabled>Delete</button>
+                <br><button class="bt" id="modify" disabled>Modify</button>
+                <br><button class="bt" id="ord" disabled>All Orders</button>
+                <br><button class="bt" id="view" disabled>View All Customers</button>
+            </div>
+
+            <div class="tab">
+                <table id="tblc" style="visibility: hidden; z-index: 1; position: absolute; float:left;">
+                    <thead>
+                        <th>Customer No.</th>
+                        <th>Name</th>
+                        <th>City</th>
+                        <th>Rating</th>
+                    </thead>
+                    <tr id="tbody">
+                        <td>nil</td>
+                        <td>nil</td>
+                        <td>nil</td>
+                        <td>nil</td>
+                    </tr>
+                </table>
+                <br>
+
+                <table id="tblo" style="visibility: hidden; z-index: 2; position: absolute; float:left;">
+                    <thead>
+                        <th>Order No.</th>
+                        <th>Customer No.</th>
+                        <th>Order Unit</th>
+                        <th>Amount</th>
+                        <th>Order Date</th>
+                        <th>Status</th>
+                        <th>Batch No.</th>
+                    </thead>
+                    <tr id="tbody">
+                        <td>nil</td>
+                        <td>nil</td>
+                        <td>nil</td>
+                        <td>nil</td>
+                        <td>nil</td>
+                        <td>nil</td>
+                        <td>nil</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

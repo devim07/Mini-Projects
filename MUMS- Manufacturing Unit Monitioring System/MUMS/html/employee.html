@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://kit.fontawesome.com/ce2a40e0cf.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <script src="https://code.jquery.com/jquery-3.6.0.js" integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk="
+    crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../css/feedback.css">
+  <link rel="stylesheet" href="../css/employee.css">
+  <title>Employee Page</title>
+  <link rel="shortcut icon" href="../img/logo_no_name.png" type="image/x-icon">
+  <link href="https://fonts.googleapis.com/css2?family=Concert+One&display=swap" rel="stylesheet">
+
+  <script>
+    window.addEventListener("DOMContentLoaded", () => {
+      console.log("Page loaded succefully");
+      const from = document.querySelector("#from");
+      const to = document.querySelector("#to");
+      const holi = document.querySelector("#holi_req");
+      const holidays = document.querySelector("#holidays");
+
+      holi.addEventListener("click", () => {
+        let days = 0;
+        if (from.value == "") {
+          window.alert("Enter the 'FROM' date");
+        } else {
+          if (to.value == "") {
+            window.alert("Enter the 'TO' date");
+          } else {
+            if (to.value >= from.value) {
+              let tod = new Date(to.value);
+              let fromd = new Date(from.value);
+              days = (Math.abs(tod - fromd) / (1000 * 60 * 60 * 24)) + 1;
+              console.log("Holiday requested for " + days + " days");
+              if (days <= 5) {
+                window.alert("Application for Holiday Request for " + days + " days, from " + from.value + " to " + to.value + " placed sucessfully");
+                holidays.placeholder = parseInt(holidays.placeholder) + days;
+              } else {
+                window.alert("Request NOT placed. Try for 5 or less days");
+              }
+            }
+            else
+              window.alert("date selection not proper");
+          }
+        }
+      });
+
+      const alpha = new RegExp('^[a-zA-Z ]*$');
+      const numeric = new RegExp('^[0-9]*$');
+      const mail = new RegExp('^([a-zA-Z0-9_.+-])+\@([a-zA-Z0-9-])+\.{1}([a-zA-Z0-9]{2,4})+$');
+
+      const bt_feedback = document.querySelector("#feedback-button");
+      bt_feedback.addEventListener("click", () => {
+        let blck = document.getElementById('feedback_hide');
+        let e = document.getElementById('feedback-main');
+        if (e.style.display == 'block') {
+          $(e).hide(1000);
+          $(blck).show(1000);
+        } else {
+          $(e).show(1000);
+          $(blck).hide(1000);
+        }
+      });
+
+      $("#submit_feedback").click(() => {
+        const name = $("#feedback-name").val();
+        const cont_feedback = $("#feedback-comment").val();
+        const email = $("#feedback-email").val();
+        var details = { name: name, email: email, feedback: cont_feedback };
+        console.log(details);
+        if (name && cont_feedback && email) {
+          if (alpha.test(name)) {
+            console.log("Name proper");
+          } else {
+            console.log("Name improper");
+            alert("Name's can only contain alphabets");
+            return;
+          }
+          if (mail.test(email)) {
+            console.log("Email proper");
+          } else {
+            console.log("Email improper");
+            alert("Please enter a valid e-mail");
+            return;
+          }
+          let got = JSON.parse(localStorage.getItem("Feedbacks") || "[]");
+          got.push(details);
+          localStorage.setItem("Feedbacks", JSON.stringify(got));
+          console.log("Feedback successful: ");
+          alert("Thanks a lot for your feedback!!");
+        } else {
+          console.log("Feedback submission Failed: Incomplete data");
+          alert("Kindly fill all fields");
+        }
+      });
+    });
+  </script>
+</head>
+
+<body>
+  <div class="container">
+    <div class="top" style="height:50px;">
+      <img src="../img/logo.png" alt="MUMS Logo" width="100px" style="position: absolute; left:47%; top:3%">
+      <a href="homepage.html"><img src="../img/house-icon.png" alt=""></a>
+    </div>
+
+    <div id="feedback-main">
+      <div id="feedback-div">
+        <form class="form" id="feedback-form1" name="form1">
+          <p class="name">
+            <input name="name" type="name" class="feedback-input" required placeholder="Name" id="feedback-name" />
+          </p>
+          <p class="email">
+            <input name="email" type="email" class="feedback-input" id="feedback-email" placeholder="Email" required />
+          </p>
+          <p class="text">
+            <textarea name="comment" type="comment" class="feedback-input" id="feedback-comment" required
+              placeholder="Please enter your valuable feedback here"></textarea>
+          </p>
+          <div class="feedback-submit">
+            <button type="button" id="submit_feedback">SEND FEEDBACK</button>
+          </div>
+        </form>
+      </div>
+    </div>
+    <button id="feedback-button" class="feedback-button">Feedback</button>
+
+    <form>
+      <br><br><br><br><br>
+      <div class="row" id="feedback_hide" style="visibility: visible;">
+        <h1 style="text-align: center;"><b> Employee Details: BALAJI SHAKTIVEL</b></h1>
+
+        <div class="col">
+          <!-- <img src="\021_Aniket_Pattiwar.jpeg" style="width: 50%; margin-left: 105px" alt="Avatar" /> -->
+          <div class="enum btn">
+            Enum: <input type="show" value="P002" />
+          </div><br><br>
+          <div class="mob btn">
+            Mobile: <input type="text" placeholder="9837895765" />
+          </div><br><br>
+          <div class="manager btn">
+            Report to: <input type="show" value="Manager-Devi Dinesh" /> </div><br><br>
+          <div class="hire btn">
+            Hire Date: <input type="show" value="1997-04-18" /> </div><br />
+        </div>
+
+        <div class="col">
+          <div class="city btn">
+            City: <input type="text" value="BOMB" /> </div><br><br>
+          <div class="address btn">
+            Address: <input type="show"
+              value="W-258257256 Midc Phase Ii Shivaji Udyog Nagar Dombivli, Mumbai Pin-400630" />
+          </div><br><br>
+          <div class="aadhar btn">
+            Aadhar No.: <input type="text" placeholder="341259998009" /> </div><br><br>
+          <div class="dob btn">
+            Dob: <input type="text" value="1975-01-31" />
+          </div>
+        </div>
+
+        <div class="col">
+          <div class="holidays btn">
+            Holidays Taken: <input id="holidays" type="show" placeholder="1" /> </div><br><br>
+          <div>
+            <div>
+              <h3>Request For Holiday</h3>
+              <h4>From:</h4>
+              <input id="from" glyphicon-calendar type="date" placeholder="dd/mm/yyyy">
+            </div>
+
+            <div>
+              <h4>To:</h4>
+              <input id="to" glyphicon-calendar type="date" placeholder="dd/mm/yyyy">
+            </div>
+            <button id="holi_req"> Apply</button>
+            <p id="msg"></p>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</body>
+
+</html>

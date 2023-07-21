@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <!-- <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    -->
+    <script src="https://code.jquery.com/jquery-3.6.0.js"
+        integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous"></script>
+    <!-- <script src="../js/feedback.js"></script> -->
+    <link rel="stylesheet" href="../css/feedback.css">
+    <link rel="stylesheet" href="../css/customer.css">
+    <title>Customer Page</title>
+    <link rel="shortcut icon" href="../img/logo_no_name.png" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Concert+One&display=swap" rel="stylesheet">
+    <script>
+        window.addEventListener("DOMContentLoaded", () => {
+            const order = document.querySelector("#order");
+            const qty = document.querySelector("#qty");
+            const allOrder = document.querySelector("#allOrder");
+
+            order.addEventListener("click", () => {
+                let num = qty.value;
+                if (num >= 100 && num <= 1000) {
+                    window.alert("Order Placed");
+                } else {
+                    window.alert("Kindly enter quantity between 100 and 1000");
+                }
+            });
+
+            allOrder.addEventListener("click", () => {
+                const tab = document.querySelector("#table");
+                tab.style.visibility = "visible";
+            });
+
+            const alpha = new RegExp('^[a-zA-Z ]*$');
+            const numeric = new RegExp('^[0-9]*$');
+            const mail = new RegExp('^([a-zA-Z0-9_.+-])+\@([a-zA-Z0-9-])+\.{1}([a-zA-Z0-9]{2,4})+$');
+
+            const bt_feedback = document.querySelector("#feedback-button");
+            bt_feedback.addEventListener("click", () => {
+                let blck = document.getElementById('feedback_hide');
+                let e = document.getElementById('feedback-main');
+                if (e.style.display == 'block') {
+                    $(e).hide(1000);
+                    $(blck).show(1000);
+                } else {
+                    $(e).show(1000);
+                    $(blck).hide(1000);
+                }
+            });
+
+            $("#submit_feedback").click(() => {
+                const name = $("#feedback-name").val();
+                const cont_feedback = $("#feedback-comment").val();
+                const email = $("#feedback-email").val();
+                var details = { name: name, email: email, feedback: cont_feedback };
+                console.log(details);
+                if (name && cont_feedback && email) {
+                    if (alpha.test(name)) {
+                        console.log("Name proper");
+                    } else {
+                        console.log("Name improper");
+                        alert("Name's can only contain alphabets");
+                        return;
+                    }
+                    if (mail.test(email)) {
+                        console.log("Email proper");
+                    } else {
+                        console.log("Email improper");
+                        alert("Please enter a valid e-mail");
+                        return;
+                    }
+                    let got = JSON.parse(localStorage.getItem("Feedbacks") || "[]");
+                    got.push(details);
+                    localStorage.setItem("Feedbacks", JSON.stringify(got));
+                    console.log("Feedback successful: ");
+                    alert("Thanks a lot for your feedback!!");
+                } else {
+                    console.log("Feedback submission Failed: Incomplete data");
+                    alert("Kindly fill all fields");
+                }
+            });
+        });
+    </script>
+</head>
+
+<body>
+    <div class="container">
+        <div class="top" style="height:50px;">
+            <img src="../img/logo.png" alt="MUMS Logo" width="100px" style="position: absolute; left:47%; top:3%">
+            <a href="homepage.html"><img src="../img/house-icon.png" alt=""></a>
+        </div>
+
+        <div id="feedback-main" style="z-index: 999;">
+            <div id="feedback-div">
+                <form class="form" id="feedback-form1" name="form1">
+                    <p class="name">
+                        <input name="name" type="name" class="feedback-input" required placeholder="Name"
+                            id="feedback-name" />
+                    </p>
+                    <p class="email">
+                        <input name="email" type="email" class="feedback-input" id="feedback-email" placeholder="Email"
+                            required />
+                    </p>
+                    <p class="text">
+                        <textarea name="comment" type="comment" class="feedback-input" id="feedback-comment" required
+                            placeholder="Please enter your valuable feedback here"></textarea>
+                    </p>
+                    <div class="feedback-submit">
+                        <button type="button" id="submit_feedback">SEND FEEDBACK</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <button id="feedback-button" class="feedback-button">Feedback</button>
+
+        <form>
+            <br><br><br><br>
+            <div class="row" id="feedback_hide" style="z-index: -1; visibility: visible">
+                <h1 style="text-align:center">Customer Details</h1>
+                <div class="vl">
+                    <span class="vl-innertext"></span>
+                </div>
+
+                <div class="col">
+                    <a href="#" class="cname btn">
+                        Customer name: <input type="show" value="Aniket Pattiwar">
+                    </a>
+                    <a href="#" class="cid btn">
+                        Customer id: <input type="show" value="3">
+                    </a>
+                    <a href="#" class="city btn">
+                        City: <input type="show" value="Nagpur">
+                    </a>
+                </div>
+
+                <div class="col">
+                    <a href="#" class="salesman btn">
+                        Salesman allocated: <input type="show" value="Akshay Jagtap">
+                    </a>
+                    <a href="#" class="cqty btn">
+                        Quantity: <input id="qty" type="quant" value="Add Quantity">
+                    </a>
+                    <input id="order" type="submit" value="Click To Place Order">
+
+                    </a>
+                    <input id="allOrder" type="submit" value="Display All Orders">
+
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <br>
+
+    <div style="display:flex; justify-content:center">
+        <img id="table" src="../img/customer_order_table.png" alt="customer_order_table" style="visibility: hidden;">
+    </div>
+</body>
+
+</html>

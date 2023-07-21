@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script src="https://code.jquery.com/jquery-3.6.0.js"
+        integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous"></script>
+    <title>MUMS Homepage</title>
+    <link rel="stylesheet" href="../css/homepage.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.min.css">
+    <link rel="shortcut icon" href="../img/logo_no_name.png" type="image/x-icon">
+    <!-- <link rel="stylesheet" media="screen and (max-width: 1170px)" href="css/phone.css"> -->
+    <link href="https://fonts.googleapis.com/css?family=Baloo+Bhai|Bree+Serif&display=swap" rel="stylesheet">
+
+    <script>
+        $(() => {
+            console.log("Page load success");
+            let feeds = JSON.parse(localStorage.getItem("Feedbacks"));
+            for (let i = 0; i < feeds.length; i++) {
+                var para = document.createElement("p");
+                console.log(feeds[i]);
+                para.innerHTML = "<b>" + feeds[i].name.toUpperCase() + ":</b><br>" + feeds[i].feedback;
+                document.getElementById("feedback").prepend(para);
+            }
+
+        });
+    </script>
+</head>
+
+<body>
+    <nav id="navbar" style="z-index:2">
+        <div id="logo">
+            <img src="../img/logo.png" alt="MUMS">
+        </div>
+        <ul>
+            <li class="item"><a href="#home">Home</a></li>
+            <li class="item"><a href="#aboutus">About Us</a></li>
+            <li class="item"><a href="#services-container">Services</a></li>
+            <li class="item"><a href="#client-section">Our Clients</a></li>
+            <li class="item"><a href="#contact">Contact Us</a></li>
+            <li class="item"><a href="login.html">Log-In</a></li>
+            <li class="item"><a style="color : rgb(255, 153, 76);" href="register.html">Register Your Company</a></li>
+        </ul>
+    </nav>
+
+    <section id="home">
+        <h1 class="h-primary">Welcome to MUMS</h1>
+        <h2><u>Manufacturing Unit Monitoring System</u></h2><br>
+        <p>MUMS provide you fastest service and maintain good relation with customer .</p>
+        <p>MUMS also provide various software services across world-wide </p>
+    </section>
+
+    <section id="services-container">
+        <br><br><br>
+        <h1 class="h-primary center">Our Services</h1>
+        <div id="services">
+            <div class="box">
+                <img src="../img/before.png" alt="">
+                <h2 class="h-secondary center">Production Scheduling</h2>
+                <p class="center">
+                    Automated, fixed-unit production request on order basis. Reduces the need for extensive inventories
+                    for storage
+                    due to unplanned routine production. Acomplete log of every activity is maintained automatically for
+                    future reference.
+                </p>
+            </div>
+            <div class="box">
+                <img src="../img/customer.png" alt="">
+                <h2 class="h-secondary center">Customer Satisfaction</h2>
+                <p class="center">Dedicated password protedcted page for each customer which provides hassel-free access
+                    all details pertaining the older order. One-click oder placement. One step registration process for
+                    new company and easy feedback portal.</p>
+            </div>
+            <div class="box">
+                <img src="../img/profitloss.png" alt="">
+                <h2 class="h-secondary center">Tally Income /Expenditure</h2>
+                <p class="center">MUMS allows you to calculate total salary of emplyee based on the given value of basic
+                    salary, HRA and sales commision at the click of a button. the monthly expense of each mont can be
+                    add to find the net profit/loss for that month.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="aboutus">
+        <br><br><br>
+        <h1 class="h-primary center">About Us</h1>
+        <div id="services">
+            <div class="box" style="width: auto; text-align: justify;">
+                <iframe style="float: left; margin: 30px 20px;" width="560" height="315"
+                    src="https://www.youtube.com/embed/TtdHWBoCU4I?autoplay=1&mute=1" title="YouTube video player"
+                    frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen></iframe>
+                <p>"Production management software" - this is a phrase you probably typed in Google searching for a
+                    solution to your production problems but soon were surprised to find thousands of search results.
+                    Names such as ERP for small manufacturers, manufacturing ERP software, and production scheduling
+                    software free popped out in hundreds of searches.
+                </p>
+                <p>That’s why here, we will help you to pick <b>the most suitable tool for production planning</b>, for
+                    your
+                    shop floor. You will register work with ease, get rid of paper orders, and last but not least,
+                    improve efficiency and gain control over processes on your production floor.
+                </p>
+                <p>
+                    If your business software doesn’t provide the transparency you need to manage holistically across
+                    the organization and take advantage of Web-based and other technology innovations like these, it’s
+                    time to consider a change.
+                </p>
+                <p>
+                    <b>Manufacturing Unit Monitoring System (MUMS)</b> will enable you to view and
+                    control events throughout your entire business process chain – from suppliers to the production
+                    processes to delivery and customer service. To maximize efficiency and speed, MUMS can further
+                    connect and share data with other systems in your production environment.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <section id="client-section">
+        <br><br><br>
+        <h1 class="h-primary center">Our Clients</h1>
+        <div id="clients">
+            <div class="client-item">
+                <img src="../img/client1.png" alt="Our Client" style="z-index: -2;">
+                <h3> Kirloskar Brothers</h3>
+            </div>
+            <div class="client-item">
+                <img src="../img/client3.jpg" alt="Our Client" style="z-index: -2;">
+                <h3>LogiNext Solutions</h3>
+            </div>
+
+            <div class="client-item">
+                <img src="../img/akshay.png" alt="Our Client" style="z-index: -2;">
+                <h3>Chitale Bandhu Mithaiwale</h3>
+            </div>
+            <div class="client-item">
+                <img src="../img/client4.jpg" alt="Our Client" style="z-index: -2;">
+                <h3> ID Solutions</h3>
+            </div>
+        </div>
+    </section>
+
+    <section id="feedback_display">
+        <br><br><br>
+        <h1 class="h-primary center">Feedback</h1>
+        <div id="feedback_box" style="margin: 2px 250px;">
+            <div class="box" id="feedback"
+                style="width: 60vw; text-align: justify; height: 450px;overflow: scroll; overflow-x: hidden;  border-radius: 10px; background-image: url('../img/feedback.png'); background-size:cover;">
+            </div>
+        </div>
+    </section>
+
+    <section id="contact">
+        <br><br><br>
+        <h1 class="h-primary center">Contact Us</h1>
+        <div id="contact-box">
+            <form action="">
+                <div class="form-group">
+                    <label for="name">Name: </label>
+                    <input type="text" name="name" id="name" placeholder="Enter your name">
+                </div>
+                <div class="form-group">
+                    <label for="email">Email: </label>
+                    <input type="email" name="name" id="email" placeholder="Enter your email">
+                </div>
+                <div class="form-group">
+                    <label for="message">Message: </label>
+                    <textarea name="message" id="message" cols="30" rows="8"></textarea>
+                </div>
+                <div class="but">
+                    <button class="bt" id="submit">Submit</button>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <div class="footer-dark">
+        <footer>
+            <div class="container">
+                <div class="row">
+                    <div class="col-sm-6 col-md-3 item">
+                        <h3>Services</h3>
+                        <ul>
+                            <li><a href="#aboutus">About Us</a></li>
+                            <li><a href="#services-container">Our Services</a></li>
+                            <li><a href="#contact">Contact Us</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-sm-6 col-md-3 item">
+                        <h3>About</h3>
+                        <ul>
+                            <li><a href="#client-section">Our Clients</a></li>
+                            <li><a href="login.html">Login</a></li>
+                            <li><a href="register.html">Register</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6 item text">
+                        <h3>MUMS</h3>
+                        <p>Manufacturing Unit Monitoring System (MUMS)</b> will enable you to view and
+                            control events throughout your entire business process chain – from suppliers to the
+                            production
+                            processes to delivery and customer service. To maximize efficiency and speed, MUMS can
+                            further
+                            connect and share data with other systems in your production environment.</p>
+                    </div>
+                    <div class="col item social"><a>
+                            <i class="icon ion-social-facebook"></i></a><a>
+                            <i class="icon ion-social-twitter"></i></a><a>
+                            <i class="icon ion-social-instagram"></i></a></div>
+                </div>
+                <p class="copyright">Copyright © www.MUMS.com. All rights reserved!
+                    Project designed by:- Aniket pattiwar,Devi Dinesh,Akshayjagtap.</p>
+            </div>
+        </footer>
+    </div>
+</body>
+
+</html>

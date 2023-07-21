@@ -1,0 +1,41 @@
+<script src="https://code.jquery.com/jquery-3.6.0.js" integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk="
+    crossorigin="anonymous"></script>
+<script src="../js/feedback.js"></script>
+<link rel="stylesheet" href="../css/feedback.css">
+
+
+
+
+<div id="feedback-main">
+    <div id="feedback-div">
+        <form class="form" id="feedback-form1" name="form1">
+            <p class="name">
+                <input name="name" type="name" class="feedback-input" required placeholder="Name" id="feedback-name" />
+            </p>
+            <p class="email">
+                <input name="email" type="email" class="feedback-input" id="feedback-email" placeholder="Email"
+                    required />
+            </p>
+            <p class="text">
+                <textarea name="comment" type="comment" class="feedback-input" id="feedback-comment" required
+                    placeholder="Please enter your valuable feedback here"></textarea>
+            </p>
+            <div class="feedback-submit">
+                <button type="button" id="submit_feedback">SEND FEEDBACK</button>
+            </div>
+        </form>
+    </div>
+</div>
+<button id="feedback-button" class="feedback-button">Feedback</button>
+
+
+
+const feedback = document.querySelector("#feedback-button");
+feedback.addEventListener('click', () => {
+var tblo = document.querySelector("#tblo");
+var tblc = document.querySelector("#tblc");
+tblo.style.visibility = "hidden";
+tblc.style.visibility = "hidden";
+// document.getElementById('feedback-main').style.display = 'none';
+// add in every event to hide feedbac box if open
+});

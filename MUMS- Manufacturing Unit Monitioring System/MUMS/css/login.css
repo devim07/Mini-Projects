@@ -1,0 +1,142 @@
+.clr {
+    color: rgba(163, 209, 225);
+    color: rgba(18, 146, 195);
+    color: rgba(88, 70, 130);
+    color: rgba(191, 109, 185);
+    color: rgba(240, 201, 219);
+}
+
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+::placeholder {
+    color: rgb(155, 183, 187);
+}
+
+body {
+    display: flex;
+    background-image: linear-gradient(to bottom right, rgba(0, 255, 255, 0.7), rgba(128, 0, 128, 0.7));
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    height: 100vh;
+    margin: 0 auto;
+}
+
+.container {
+    border-radius: 10px;
+    /* background-color: aqua; */
+    width: 90vw;
+    max-width: 100%;
+    min-height: 50%;
+}
+
+.login {
+    position: relative;
+}
+
+.logo {
+    position: inherit;
+    height: 100%;
+    justify-content: left;
+    align-items: center;
+}
+
+#logo {
+    width: 220px;
+    position: absolute;
+    top: 40px;
+    left: 0;
+    align-self: center;
+    margin: 0px 30px;
+}
+
+.login-box {
+    position: absolute;
+    left: 25%;
+    width: 500px;
+    padding: 30px 30px;
+    grid-template-rows: repeat(3, auto);
+    background-image: linear-gradient(to bottom right, rgba(128, 0, 128, 0.5), rgba(0, 255, 255, 0.5));
+    border-radius: 30px;
+    box-shadow: inset -3px -3px 5px rgba(128, 0, 128, 0.7),
+        5px 5px 10px rgb(0, 0, 0, 0.7);
+}
+
+.pics {
+    position: relative;
+    right: 0%;
+    opacity: 0.7;
+    visibility: hidden;
+}
+
+.login-select {
+    grid-template-columns: repeat(3, 150px);
+    margin: 20px 0px;
+}
+
+
+.login-input,
+.login-button {
+    grid-template-columns: repeat(1, 370px);
+    margin: 20px 40px;
+}
+
+.login-select button,
+.login-input input {
+    margin: 5px 5px;
+    height: 40px;
+    padding: 0px 20px;
+    border: none;
+    box-shadow: inset -3px -3px 5px rgb(228, 228, 228),
+        5px 5px 10px rgb(0, 0, 0, 0.7);
+    background-color: rgba(0, 0, 0, 0);
+    border-radius: 20px;
+    font-size: 1.3em;
+    color: white;
+    font-family: 'Concert One', cursive;
+}
+
+.login-select button {
+    width: 132px;
+}
+
+.login-input input {
+    width: 350px;
+}
+
+.login-input input {
+    margin: 5px 5px;
+    height: 50px;
+    color: aliceblue;
+}
+
+#customer:hover,
+#admin:hover,
+#employee:hover {
+    box-shadow: 5px 5px 5px 0px rgb(0, 0, 0, 0.7);
+}
+
+.login-button button {
+    width: 300px;
+    margin: 5px 30px;
+    height: 50px;
+    padding: 10px 20px;
+    border: none;
+    background-color: rgba(0, 255, 255, 0.3);
+    box-shadow: inset -3px -3px 5px rgb(228, 228, 228),
+        5px 5px 10px rgb(0, 0, 0, 0.7);
+
+    border-radius: 10px;
+    font-size: 1.3em;
+    color: white;
+    font-family: 'Concert One', cursive;
+}
+
+.login-button button:hover {
+    box-shadow: 5px 5px 5px 0px rgb(0, 0, 0, 0.7);
+}

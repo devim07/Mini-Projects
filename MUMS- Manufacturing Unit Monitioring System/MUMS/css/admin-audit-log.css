@@ -1,0 +1,81 @@
+* {
+    margin: 0;
+    padding: 0;
+    font-family: 'Philosopher', sans-serif;
+}
+
+body {
+    height: 3500px;
+    background-image: linear-gradient(to bottom right, rgba(0, 255, 255, 0.7), rgba(128, 0, 128, 0.7));
+}
+
+header {
+    height: 30vh;
+    background-size: cover;
+    background-position: center;
+}
+
+ul {
+    float: right;
+    list-style-type: none;
+    margin-top: 35px;
+}
+
+ul li {
+    display: inline-block;
+
+}
+
+ul li a {
+    text-decoration: none;
+    border: none;
+    padding: 5px 10px;
+    font-size: 20px;
+    position: relative;
+    background: transparent;
+    color: rgba(128, 0, 128, 0.7);
+    text-transform: uppercase;
+    border: 3px solid rgba(128, 0, 128, 0.7);
+    cursor: pointer;
+    transition: all 0.7s;
+    overflow: hidden;
+    border-radius: 100px;
+}
+
+ul li a:hover {
+    background-color: black;
+    color: rgba(0, 255, 255, 0.7);
+    transition: 0.6s ease;
+}
+
+ul li.new_menu a {
+    background-color: #fff;
+    color: #000;
+}
+
+.logo img {
+    float: left;
+    width: 150px;
+    height: auto;
+}
+
+.main {
+    max-width: 1300px;
+    margin: auto;
+}
+
+.button {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, 850%);
+
+}
+
+.btn {
+    text-decoration: none;
+    color: red;
+    padding: 10px 30px;
+    border: 1px solid transparent;
+
+}

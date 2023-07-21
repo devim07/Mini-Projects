@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE-edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Philosopher:wght@700&display=swap" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.js"
+        integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous"></script>
+    <script src="../js/feedback.js"></script>
+    <link rel="stylesheet" href="../css/feedback.css">
+    <title>MUMS admin-Login Page</title>
+    <link rel="stylesheet" type="text/css" href="../css/admin-home.css">
+    <link rel="shortcut icon" href="../img/logo_no_name.png" type="image/x-icon">
+
+
+
+</head>
+
+<body>
+    <header>
+        <div class="main">
+            <div class="slider-box">
+                <div class="img">
+                </div>
+            </div>
+
+            <div class="logo">
+                <img src="../img/logo_no_name.png">
+            </div>
+            <ul>
+
+                <li class="new_menu">
+                <li><a href="homepage.html">Home</a></li>
+                <li><a href="admin-customer.html">Customer</a></li>
+                <li><a href="admin-employee.html">Employee</a></li>
+                <li><a href="admin-orders.html">Orders</a></li>
+                <li><a href="admin-sal-exp.html">Salary/Expense</a></li>
+                <li><a href="admin-audit-log.html">Activity Log</a></li>
+
+            </ul>
+        </div>
+        <div class="button">
+
+            <h2><b><i>Welcome to MUMS... You manufacture, We monitor...</i></b></h2>
+        </div>
+    </header>
+    <div id="feedback-main">
+        <div id="feedback-div">
+            <form class="form" id="feedback-form1" name="form1">
+                <p class="name">
+                    <input name="name" type="name" class="feedback-input" required placeholder="Name"
+                        id="feedback-name" />
+                </p>
+                <p class="email">
+                    <input name="email" type="email" class="feedback-input" id="feedback-email" placeholder="Email"
+                        required />
+                </p>
+                <p class="text">
+                    <textarea name="comment" type="comment" class="feedback-input" id="feedback-comment" required
+                        placeholder="Please enter your valuable feedback here"></textarea>
+                </p>
+                <div class="feedback-submit">
+                    <button type="button" id="submit_feedback">SEND FEEDBACK</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <button id="feedback-button" class="feedback-button">Feedback</button>
+</body>
+
+</html>
